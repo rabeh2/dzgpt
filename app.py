@@ -7,6 +7,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+from translation_service import TranslationService
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -124,11 +125,19 @@ def call_gemini_api(messages_list, temperature, max_tokens=512):
         return None, f"خطأ غير متوقع في معالجة استجابة النموذج الاحتياطي: {str(e)}"
 
 
+# --- Initialize translation service ---
+translation_service = TranslationService()
+
 # --- Route for main page ---
 @app.route('/')
 def index():
     # Pass app_title to the template
     return render_template('index.html', app_title=APP_TITLE)
+    
+# --- Route for translation page ---
+@app.route('/translation')
+def translation_page():
+    return render_template('translation.html', app_title=f"{APP_TITLE} | خدمة الترجمة")
 
 # --- API route for chat ---
 @app.route('/api/chat', methods=['POST'])
@@ -380,6 +389,51 @@ def update_conversation_title(conversation_id):
     except Exception as e:
         logger.error(f"Error updating conversation title {conversation_id}: {e}", exc_info=True)
         return jsonify({"error": f"خطأ في تحديث عنوان المحادثة: {str(e)}"}), 500
+
+# --- API routes for translation service ---
+@app.route('/api/translation/languages', methods=['GET'])
+def get_translation_languages():
+    """الحصول على قائمة اللغات المدعومة للترجمة"""
+    try:
+        languages = translation_service.get_supported_languages()
+        return jsonify(languages)
+    except Exception as e:
+        logger.error(f"Error getting supported languages: {e}", exc_info=True)
+        return jsonify({"error": f"خطأ في استرجاع اللغات المدعومة: {str(e)}"}), 500
+
+@app.route('/api/translation/translate', methods=['POST'])
+def translate_text():
+    """ترجمة النص المقدم إلى اللغة المطلوبة"""
+    try:
+        data = request.json
+        text = data.get('text', '')
+        source_lang = data.get('source_lang', 'auto')
+        target_lang = data.get('target_lang', 'ar')
+        
+        if not text:
+            return jsonify({"error": "النص مطلوب للترجمة"}), 400
+            
+        result = translation_service.translate_text(text, source_lang, target_lang)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error translating text: {e}", exc_info=True)
+        return jsonify({"error": f"خطأ في ترجمة النص: {str(e)}"}), 500
+
+@app.route('/api/translation/detect', methods=['POST'])
+def detect_language():
+    """الكشف عن لغة النص المقدم"""
+    try:
+        data = request.json
+        text = data.get('text', '')
+        
+        if not text:
+            return jsonify({"error": "النص مطلوب للكشف عن اللغة"}), 400
+            
+        detected_lang = translation_service.detect_language(text)
+        return jsonify({"detected_language": detected_lang})
+    except Exception as e:
+        logger.error(f"Error detecting language: {e}", exc_info=True)
+        return jsonify({"error": f"خطأ في الكشف عن اللغة: {str(e)}"}), 500
 
 # --- API route for regenerating the last AI response ---
 @app.route('/api/regenerate', methods=['POST'])
