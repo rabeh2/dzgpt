@@ -1,5 +1,8 @@
-flask
-flask-sqlalchemy
-psycopg2-binary
-requests
-gunicorn
+Flask
+Flask-SQLAlchemy
+Flask-Session
+psycopg2-binary # Or just psycopg2 if you have build tools
+python-dotenv
+gunicorn # If using for deployment
+requests # Likely needed for calling OpenRouter/Gemini in POST handlers
+# Add other specific libraries you use (e.g., for Gemini client)
