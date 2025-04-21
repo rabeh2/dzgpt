@@ -1,0 +1,31 @@
+services:
+  - type: web # نوع الخدمة: تطبيق ويب
+    name: yasmin-gpt-chat # اسم الخدمة في Render
+    env: python # بيئة التشغيل
+    plan: free # أو أي خطة مدفوعة (تأكد من أن الخطة المجانية كافية لمواردك)
+    buildCommand: "pip install -r requirements.txt" # أمر بناء التطبيق
+    startCommand: "gunicorn app:app" # أمر تشغيل التطبيق
+    envVars:
+      - key: PYTHON_VERSION # حدد إصدار بايثون الموصى به
+        value: 3.11 # أو أحدث إصدار مدعوم ومستقر
+      - key: DATABASE_URL # سيتم توفيره تلقائيًا بواسطة Render عند ربط قاعدة البيانات
+        fromDatabase:
+          name: yasmin-db # اسم خدمة قاعدة البيانات التي ستنشئها في Render
+          property: connectionString
+      - key: OPENROUTER_API_KEY
+        sync: false # لا تقم بمزامنة هذا المفتاح الحساس مع المستودع
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true # اجعل Render ينشئ قيمة عشوائية آمنة
+      - key: APP_URL # مهم: اضبط هذا على عنوان URL الذي سيوفره Render لتطبيقك
+        value: https://yasmin-gpt-chat.onrender.com # استبدل باسم خدمتك
+      - key: LOG_LEVEL # للتحكم في مستوى التسجيل (INFO, DEBUG, WARNING)
+        value: INFO
+
+databases:
+  - name: yasmin-db # اسم خدمة قاعدة البيانات
+    plan: free # أو أي خطة مدفوعة
+    databaseName: yasmin_chat_db # اسم قاعدة البيانات الفعلي داخل PostgreSQL
+    user: yasmin_user # اسم المستخدم لقاعدة البيانات
+    # Render سيعتني بكلمة المرور
