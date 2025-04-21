@@ -1,0 +1,251 @@
+/* تنسيق صفحة الترجمة */
+.translation-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.translation-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.language-selectors {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.source-language, .target-language {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.lang-select, .provider-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 14px;
+    min-width: 150px;
+}
+
+.swap-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.2s ease;
+}
+
+.swap-btn:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.05);
+}
+
+.provider-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.translation-areas {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+@media (min-width: 768px) {
+    .translation-areas {
+        flex-direction: row;
+    }
+}
+
+.text-area-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.textarea-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--accent-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.textarea-title {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.textarea-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.action-btn:hover {
+    background-color: var(--hover-color);
+}
+
+.translation-textarea {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    resize: none;
+    height: 200px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    font-size: 16px;
+    line-height: 1.5;
+    font-family: 'Cairo', sans-serif;
+}
+
+.translation-textarea:focus {
+    outline: none;
+}
+
+.translation-controls-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.translate-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.translate-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.translation-status {
+    padding: 10px;
+}
+
+.info-box {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: var(--text-color);
+    border-right: 4px solid var(--primary-color);
+}
+
+/* تنسيقات متحركة */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.translating {
+    animation: pulse 1.5s infinite;
+}
+
+/* مؤشر النجاح والخطأ */
+.success-info {
+    border-right-color: #4CAF50;
+}
+
+.error-info {
+    border-right-color: #f44336;
+}
+
+/* موائمة التصميم للأجهزة المحمولة */
+@media (max-width: 767px) {
+    .translation-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .language-selectors {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .swap-btn {
+        align-self: center;
+        margin: 5px 0;
+        transform: rotate(90deg);
+    }
+    
+    .swap-btn:hover {
+        transform: rotate(90deg) scale(1.05);
+    }
+}
+
+/* رابط العودة */
+.back-btn {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: bold;
+    transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+    color: var(--primary-hover);
+}
