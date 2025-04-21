@@ -1,8 +1,7 @@
 Flask
 Flask-SQLAlchemy
 Flask-Session
-psycopg2-binary # Or just psycopg2 if you have build tools
+psycopg2-binary  # أو psycopg2
 python-dotenv
-gunicorn # If using for deployment
-requests # Likely needed for calling OpenRouter/Gemini in POST handlers
-# Add other specific libraries you use (e.g., for Gemini client)
+requests
+gunicorn         # للنشر (اختياري للتطوير المحلي)
