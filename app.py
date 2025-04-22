@@ -908,7 +908,7 @@ def not_found_error(error):
     if request.path.startswith('/api/'):
         logger.warning(f"404 Not Found for API route: {request.path} from {request.remote_addr}")
         return jsonify({"error": "نقطة النهاية المطلوبة غير موجودة."}), 404
-    logger.warning(f"404 Not Found for page: {request.path} from {request.remote_addr}")
+    logger.warning(f"404 Not Found for page: {request.path} من {request.remote_addr}") # Added Arabic translation
     # Ensure you have an error.html template
     try:
         # Assuming you have a basic error.html template
@@ -946,7 +946,7 @@ def internal_error(error):
 @app.errorhandler(Exception)
 def handle_exception(e):
      # Log the unhandled exception
-     logger.error(f"Unhandled Exception for {request.path}: {e}", exc_info=True)
+     logger.error(f"Unhandled Exception for {request.path} from {request.remote_addr}: {e}", exc_info=True) # Added remote_addr
 
      # Attempt rollback
      try:
@@ -957,7 +957,7 @@ def handle_exception(e):
      # Return appropriate response based on request type
      if request.path.startswith('/api/'):
          # Avoid exposing detailed internal errors in production API responses
-         return jsonify({"error": "حدث خطأ غير متوقع في الخادم."}), 500
+         return jsonify({"error": "حدث خطأ غير متوقع في الخادم."}), 500 # Generic message
      else:
          # Ensure you have an error.html template
          try:
@@ -1010,4 +1010,7 @@ if __name__ != '__main__':
     app.logger.setLevel(gunicorn_logger.level)
     logger.info("Application started via WSGI server (like Gunicorn). Logging handlers configured.")
 else:
-     # This block is for local development using
+     # This block is for local development using `python app.py`
+     logger.info("Starting Flask development server (use Gunicorn/WSGI for production)...")
+     port = int(os.environ.get("PORT", 5001))
+     app.run(host='0.0.0.0', port=port, debug=True) # Use debug=False for production
