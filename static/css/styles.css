@@ -581,3 +581,1039 @@ body.dark-mode .empty-state.loading-messages i {
 body.dark-mode .primary-button {
     background-color: var(--accent-color-dark);
     box-shadow: 0 2
+/* --- CSS Reset and Variables --- */
+/* ... (previous variables) ... */
+
+/* --- Global Styles --- */
+/* ... (previous global styles) ... */
+
+/* --- App Container --- */
+/* ... (previous app container styles) ... */
+
+/* --- Sidebar Styles --- */
+/* ... (previous sidebar styles) ... */
+
+/* --- Chat Container --- */
+/* ... (previous chat container styles) ... */
+
+
+/* Buttons */
+/* ... (previous button styles) ... */
+
+.primary-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color-light);
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-size: 1rem; /* Standard icon size */
+}
+
+body.dark-mode .icon-button {
+    color: var(--text-color-dark);
+}
+
+.icon-button:hover {
+    background-color: var(--hover-light);
+}
+
+body.dark-mode .icon-button:hover {
+    background-color: var(--hover-dark);
+}
+
+.icon-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.danger-button {
+    background-color: var(--error-color-light);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    font-family: var(--font-family-body, var(--font-family));
+    transition: background-color var(--transition-speed);
+}
+
+body.dark-mode .danger-button {
+    background-color: var(--error-color-dark);
+}
+
+.danger-button:hover {
+    background-color: #c82333; /* Slightly darker red */
+}
+body.dark-mode .danger-button:hover {
+    background-color: #d62c1a; /* Slightly darker red for dark mode */
+}
+
+
+/* Sidebar Footer */
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--sidebar-border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #888;
+    font-size: 0.9rem;
+}
+body.dark-mode .sidebar-footer {
+    border-top-color: var(--sidebar-border-dark);
+    color: #bbb;
+}
+.sidebar-footer span {
+     opacity: 0.8;
+}
+
+/* --- Chat Container --- */
+#chat-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- Header and Footer Styles --- */
+.chat-header,
+.chat-footer {
+    flex-shrink: 0;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    text-align: center;
+    background-color: var(--primary-color-light);
+    color: var(--text-color-light);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    z-index: 5;
+}
+
+body.dark-mode .chat-header,
+body.dark-mode .chat-footer {
+    background-color: var(--primary-color-dark);
+    color: var(--text-color-dark);
+}
+
+.chat-header {
+    border-bottom: 1px solid var(--secondary-color-light);
+}
+
+body.dark-mode .chat-header {
+    border-bottom-color: var(--secondary-color-dark);
+}
+
+.chat-header h2 {
+    margin: 0 var(--spacing-sm) 0 0; /* Margin right in RTL */
+    font-size: 1.1rem;
+    color: inherit;
+    display: inline-block;
+}
+
+.chat-header .version {
+     font-size: 0.8em;
+     opacity: 0.8;
+     margin-right: var(--spacing-xs);
+}
+
+.chat-header p,
+.chat-footer p {
+    font-size: 0.8rem; /* Slightly smaller footer text */
+    margin: 0;
+    color: #888;
+}
+
+body.dark-mode .chat-header p,
+body.dark-mode .chat-footer p {
+    color: #bbb;
+}
+
+.chat-footer {
+    border-top: 1px solid var(--secondary-color-light);
+}
+
+body.dark-mode .chat-footer {
+    border-top-color: var(--secondary-color-dark);
+}
+
+/* Overlay for Mobile Sidebar */
+#sidebar-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 9; /* Below sidebar, above chat */
+    transition: opacity var(--transition-speed) ease;
+    opacity: 0;
+}
+#sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
+
+/* Offline Indicator */
+#offline-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    position: absolute;
+    top: calc(var(--chat-header-height) + var(--spacing-md));
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffc107;
+    color: #333;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 15px;
+    font-size: 0.9rem;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+    pointer-events: none;
+    visibility: hidden;
+    min-width: 150px;
+}
+
+#offline-indicator.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#offline-indicator i {
+    margin-left: var(--spacing-xs);
+}
+
+/* Global App Error Message */
+#app-error-message {
+    position: fixed;
+    /* Calculate position dynamically based on input area height */
+    /* Adjusted using JS based on #input-area clientHeight */
+    bottom: 20px; /* Fallback/initial position */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--error-color-light);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    z-index: 110;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, bottom 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    pointer-events: none;
+    max-width: 90%; /* Don't span full width on large screens */
+    text-align: right; /* Ensure text is aligned right */
+}
+
+body.dark-mode #app-error-message {
+    background-color: var(--error-color-dark);
+}
+
+#app-error-message.show {
+    opacity: 1;
+    visibility: visible;
+    /* JS will update the 'bottom' style directly for precision */
+}
+
+
+/* Messages Container */
+#messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+    background-color: var(--primary-color-light);
+    transition: background-color var(--transition-speed);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md); /* Add gap between bubbles */
+
+     &::-webkit-scrollbar {
+         width: 8px;
+     }
+     &::-webkit-scrollbar-track {
+         background: transparent; /* Scrollbar track matches chat area bg */
+     }
+     &::-webkit-scrollbar-thumb {
+         background: var(--secondary-color-light);
+         border-radius: 10px;
+     }
+     body.dark-mode &::-webkit-scrollbar-track {
+         background: transparent;
+     }
+     body.dark-mode &::-webkit-scrollbar-thumb {
+         background: var(--secondary-color-dark);
+     }
+}
+
+body.dark-mode #messages {
+    background-color: var(--primary-color-dark);
+}
+
+/* Message Bubbles */
+.message-bubble {
+    max-width: 85%; /* Slightly wider bubbles */
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-bubble); /* Use bubble radius variable */
+    position: relative;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Add padding for timestamp and actions */
+    padding-bottom: calc(var(--spacing-md) + 15px); /* Space for timestamp + actions */
+}
+
+/* Initial welcome message style */
+.message-bubble.initial-welcome {
+    /* Add any special styles if needed */
+}
+
+
+.user-bubble {
+    background-color: var(--user-bubble-light);
+    color: var(--text-color-light);
+    margin-right: 0;
+    margin-left: auto;
+    border-bottom-left-radius: var(--spacing-sm); /* Smaller radius at bottom corner */
+    text-align: right;
+    color: #052c65; /* Darker text for readability on light bubble */
+}
+
+body.dark-mode .user-bubble {
+    background-color: var(--user-bubble-dark);
+    color: var(--text-color-dark);
+}
+
+.ai-bubble {
+    background-color: var(--ai-bubble-light);
+    color: var(--text-color-light);
+    margin-left: 0;
+    margin-right: auto;
+    border-bottom-right-radius: var(--spacing-sm); /* Smaller radius at bottom corner */
+    text-align: right;
+}
+
+body.dark-mode .ai-bubble {
+    background-color: var(--ai-bubble-dark);
+    color: var(--text-color-dark);
+}
+
+/* Message Timestamp */
+.message-timestamp {
+    position: absolute;
+    bottom: var(--spacing-xs);
+    right: var(--spacing-md); /* Position right for AI bubble */
+    font-size: 0.7rem;
+    color: var(--timestamp-color-light);
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.15s ease;
+    direction: ltr; /* Display time LTR */
+}
+
+body.dark-mode .message-timestamp {
+    color: var(--timestamp-color-dark);
+}
+
+/* Position timestamp for user bubble */
+.user-bubble .message-timestamp {
+     left: var(--spacing-md);
+     right: auto;
+}
+
+/* Message Actions (Copy, Speak, Vote) */
+.message-actions {
+    position: absolute;
+    bottom: var(--spacing-xs);
+    left: var(--spacing-md); /* Position left for AI bubble actions */
+    display: flex;
+    gap: var(--spacing-xs);
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.15s ease;
+    z-index: 2;
+}
+
+/* Position actions for user bubble */
+.user-bubble .message-actions {
+     right: var(--spacing-md);
+     left: auto;
+     justify-content: flex-end;
+}
+
+/* Show actions and timestamp on bubble hover */
+.message-bubble:hover .message-actions,
+.message-bubble:hover .message-timestamp {
+    opacity: 1;
+}
+
+/* Hide timestamp on mobile */
+@media (max-width: 768px) {
+     .message-timestamp {
+         display: none;
+     }
+     /* Adjust actions position if timestamp is hidden */
+    .message-actions {
+        bottom: var(--spacing-sm); /* Adjust bottom position */
+        /* opacity: 1; */ /* Option: Always show actions on mobile */
+        /* For now, keep hover behavior */
+    }
+    .user-bubble .message-actions {
+         bottom: var(--spacing-sm);
+    }
+    .message-bubble {
+         padding-bottom: var(--spacing-md); /* Reduce bottom padding as timestamp is not visible */
+    }
+}
+
+
+.message-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    color: inherit; /* Inherit text color from bubble */
+    opacity: 0.8; /* Slightly less prominent */
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+    font-size: 0.9rem; /* Slightly smaller icons */
+}
+
+.message-actions button:hover {
+    opacity: 1;
+    background-color: rgba(0,0,0,0.05);
+}
+
+body.dark-mode .message-actions button:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* Specific styles for Vote buttons */
+.vote-buttons {
+    display: flex;
+    gap: var(--spacing-xs); /* Space between like/dislike */
+    align-items: center;
+    margin-left: var(--spacing-sm); /* Space from copy/speak buttons */
+}
+
+.vote-buttons button {
+     color: var(--timestamp-color-light); /* Default color is muted */
+     transition: color 0.15s ease, transform 0.1s ease;
+}
+body.dark-mode .vote-buttons button {
+     color: var(--timestamp-color-dark);
+}
+
+.vote-buttons button:hover {
+    opacity: 1; /* Full opacity on hover */
+    background-color: var(--hover-light);
+}
+body.dark-mode .vote-buttons button:hover {
+    background-color: var(--hover-dark);
+}
+
+/* Active Vote States */
+.vote-buttons button.liked i {
+    color: var(--like-color-light); /* Green when liked */
+}
+body.dark-mode .vote-buttons button.liked i {
+    color: var(--like-color-dark);
+}
+
+.vote-buttons button.disliked i {
+    color: var(--dislike-color-light); /* Red when disliked */
+}
+body.dark-mode .vote-buttons button.disliked i {
+    color: var(--dislike-color-dark);
+}
+
+/* Disable state after voting */
+.vote-buttons button:disabled {
+    opacity: 1; /* Keep opacity high so the color is visible */
+    cursor: default; /* Change cursor */
+    background: none; /* Remove hover background */
+}
+.vote-buttons button:disabled:hover {
+     background: none; /* Ensure no hover effect after disabled */
+}
+
+
+/* color for active Speak icon */
+.message-actions button i.fa-volume-high {
+    color: var(--accent-color-light);
+}
+body.dark-mode .message-actions button i.fa-volume-high {
+    color: var(--accent-color-dark);
+}
+
+
+/* Error Message Bubble */
+.message-bubble.error-bubble {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Dark red text */
+    border: 1px solid #f5c6cb;
+    border-radius: var(--border-radius);
+    margin-right: auto;
+    margin-left: auto; /* Center align */
+    max-width: 95%;
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: right;
+    /* Remove timestamp and actions padding as they are not relevant here */
+    padding-bottom: var(--spacing-md);
+}
+
+body.dark-mode .message-bubble.error-bubble {
+    background-color: #721c24;
+    color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.message-bubble.error-bubble i {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+
+/* Typing Indicator */
+.typing-indicator-bubble {
+    max-width: 85%; /* Same width as AI bubble */
+    margin-right: auto;
+    margin-left: 0;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-bubble);
+    border-bottom-right-radius: var(--spacing-sm);
+    background-color: var(--ai-bubble-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding-bottom: var(--spacing-md); /* No timestamp/actions in typing indicator */
+}
+body.dark-mode .typing-indicator-bubble {
+     background-color: var(--ai-bubble-dark);
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    direction: ltr;
+    justify-content: flex-end;
+}
+
+.typing-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #888;
+    margin-left: 3px;
+    animation: typingAnimation 1.4s infinite;
+}
+body.dark-mode .typing-dot {
+     background-color: #bbb;
+}
+
+
+.typing-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
+    0% { opacity: 0.3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-4px); }
+    100% { opacity: 0.3; transform: translateY(0); }
+}
+
+/* Regenerate Button */
+#regenerate-button {
+    display: flex; /* Controlled by JS */
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-md) auto; /* Center horizontally, add margin */
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--secondary-color-light);
+    color: var(--text-color-light);
+    border: 1px solid var(--input-border-light);
+    border-radius: var(--border-radius);
+    font-family: var(--font-family-body, var(--font-family));
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+body.dark-mode #regenerate-button {
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--input-border-dark);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#regenerate-button:hover {
+    background-color: var(--hover-light);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+body.dark-mode #regenerate-button:hover {
+    background-color: var(--hover-dark);
+}
+
+#regenerate-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+
+/* Input Area */
+#input-area {
+    padding: var(--spacing-md);
+    background-color: var(--bg-color-light);
+    border-top: 1px solid var(--secondary-color-light);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+    flex-shrink: 0;
+    height: auto; /* Determined by content */
+    min-height: calc(40px + 2 * var(--spacing-sm) + 2 * var(--spacing-xs)); /* min-height of textarea + padding */
+}
+
+body.dark-mode #input-area {
+    background-color: var(--bg-color-dark);
+    border-top-color: var(--secondary-color-dark);
+}
+
+#input-container {
+    display: flex;
+    align-items: flex-end;
+    background-color: var(--input-bg-light);
+    border: 1px solid var(--input-border-light);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+body.dark-mode #input-container {
+    background-color: var(--input-bg-dark);
+    border-color: var(--input-border-dark);
+}
+
+#message-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: var(--spacing-sm);
+    background-color: transparent;
+    color: var(--text-color-light);
+    font-family: var(--font-family-body, var(--font-family));
+    font-size: 1rem;
+    resize: none;
+    min-height: 40px;
+    max-height: 200px;
+    transition: color var(--transition-speed);
+    margin: 0;
+    box-sizing: border-box;
+    line-height: 1.5;
+    /* Prevent text selection issues on resize */
+    user-select: auto;
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+}
+
+body.dark-mode #message-input {
+    color: var(--text-color-dark);
+}
+
+#message-input::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+body.dark-mode #message-input::placeholder {
+    color: #777;
+}
+
+#send-button {
+    border: none;
+    background-color: var(--accent-color-light);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: var(--spacing-xs); /* Margin in RTL */
+    flex-shrink: 0;
+    transition: background-color var(--transition-speed), transform 0.15s ease;
+}
+
+body.dark-mode #send-button {
+    background-color: var(--accent-color-dark);
+}
+
+#send-button:hover {
+    background-color: var(--accent-color-light-hover);
+}
+body.dark-mode #send-button:hover {
+    background-color: var(--accent-color-dark-hover);
+}
+
+#send-button:active {
+    transform: scale(0.95);
+}
+
+#send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+body.dark-mode #send-button:disabled {
+    background-color: #555;
+}
+
+/* Input Footer */
+.input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-xs);
+    padding: 0 var(--spacing-xs);
+}
+
+.typing-hint {
+    font-size: 0.8rem;
+    color: #888;
+    text-align: right;
+}
+
+body.dark-mode .typing-hint {
+    color: #777;
+}
+
+/* Mobile Menu Button (Fixed) */
+#mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color-light);
+    color: white;
+    border-radius: 50%;
+    z-index: 25;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color var(--transition-speed), transform 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+body.dark-mode #mobile-menu {
+    background-color: var(--accent-color-dark);
+}
+#mobile-menu:active {
+    transform: scale(0.95);
+}
+
+
+/* Mobile Settings Button (in Input Footer) */
+#mobile-settings {
+    display: none;
+}
+
+/* Microphone Button Styles (in Input Container) */
+#mic-button {
+    margin-left: var(--spacing-xs);
+    transition: color 0.15s ease, background-color 0.15s ease;
+    flex-shrink: 0;
+}
+
+#mic-button.recording {
+    color: var(--mic-recording-light);
+    animation: pulse 1.5s infinite;
+}
+
+body.dark-mode #mic-button.recording {
+    color: var(--mic-recording-dark);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Confirmation Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.6);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--bg-color-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    transition: background-color var(--transition-speed);
+    text-align: right; /* Ensure modal content is RTL */
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--bg-color-dark);
+}
+
+.modal-content h3 {
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    color: var(--text-color-light);
+}
+body.dark-mode .modal-content h3 {
+    color: var(--text-color-dark);
+}
+
+.modal-content p {
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-color-light);
+    opacity: 0.9;
+}
+body.dark-mode .modal-content p {
+     color: var(--text-color-dark);
+}
+
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end; /* Buttons to the right in RTL */
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.modal-buttons button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: var(--font-family-body, var(--font-family));
+    font-size: 1rem;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.modal-buttons button:not(.danger-button) {
+    background-color: var(--secondary-color-light);
+    border: none;
+    color: var(--text-color-light);
+}
+
+body.dark-mode .modal-buttons button:not(.danger-button) {
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
+}
+.modal-buttons button:not(.danger-button):hover {
+    opacity: 0.9;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    #settings-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 85%; /* Wider on smaller screens */
+        max-width: 300px; /* Max width limit */
+        transform: translateX(100%);
+        z-index: 20;
+        box-shadow: -4px 0 10px rgba(0,0,0,0.2);
+    }
+
+    #settings-sidebar.show {
+        transform: translateX(0); /* Slide in */
+    }
+
+    #mobile-menu {
+        display: flex; /* Show on mobile */
+        /* Move it slightly to not overlap with the sidebar when open */
+        right: var(--spacing-md);
+    }
+
+     #settings-sidebar.show + #sidebar-overlay + #chat-container #mobile-menu {
+         right: calc(var(--sidebar-width) + var(--spacing-md)); /* Position outside the visible sidebar */
+         transition: right var(--transition-speed) ease-in-out;
+     }
+
+
+    #mobile-settings {
+        display: block; /* Show on mobile */
+    }
+
+    .sidebar-footer #toggle-sidebar {
+        display: none; /* Hide desktop toggle on mobile */
+    }
+
+     /* Show close button on mobile sidebar */
+     #settings-sidebar .sidebar-header #close-sidebar {
+         display: flex;
+     }
+
+    /* Slightly smaller messages on mobile */
+    .message-bubble {
+        max-width: 95%;
+    }
+     /* Ensure actions/timestamp are within bounds */
+     .message-bubble .message-actions {
+         left: var(--spacing-sm); /* Reduce left margin */
+         right: auto; /* Reset right */
+     }
+    .user-bubble .message-actions {
+         right: var(--spacing-sm); /* Reduce right margin */
+         left: auto; /* Reset left */
+     }
+
+     .message-bubble .message-timestamp {
+         right: var(--spacing-sm); /* Reduce right margin */
+         left: auto; /* Reset left */
+     }
+     .user-bubble .message-timestamp {
+         left: var(--spacing-sm); /* Reduce left margin */
+         right: auto; /* Reset right */
+     }
+
+
+    /* Adjust input area padding on mobile */
+    #input-area {
+        padding: var(--spacing-sm);
+    }
+    #input-container {
+         padding: var(--spacing-xs);
+    }
+    #message-input {
+         padding: var(--spacing-sm);
+    }
+     #mic-button, #send-button {
+         margin-left: var(--spacing-xs);
+     }
+
+    .input-footer {
+        padding: 0 var(--spacing-xs);
+    }
+
+    .chat-header, .chat-footer {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Add CSS for code block copy button */
+button.copy-code-button {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    /* Float or position this strategically near the code block */
+    float: left; /* Example: Position left in RTL */
+    margin-right: 10px; /* Space from code */
+    margin-top: 5px; /* Space above if needed */
+    /* clear: both; */ /* Might be needed depending on layout */
+    /* position: absolute; top: 5px; left: 5px; z-index: 1; */ /* Alternative absolute positioning */
+}
+button.copy-code-button:hover {
+    background-color: #e2e2e2;
+}
+button.copy-code-button i {
+    color: #333; /* Keep icon color consistent */
+}
+button.copy-code-button.copied {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+button.copy-code-button.copied i {
+     color: white;
+}
+button.copy-code-button.error {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+button.copy-code-button.error i {
+     color: white;
+}
+
+/* Adjust pre padding if using absolute positioned copy button */
+pre {
+    position: relative; /* Needed for absolute positioning of button */
+    padding-top: 10px; /* Add space for the button if inside */
+    clear: both; /* Ensure pre starts below floated button */
+}
