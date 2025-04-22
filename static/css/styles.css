@@ -9,15 +9,12 @@
     --user-bubble-light: #e3f2fd;
     --ai-bubble-light: #ffffff;
     --sidebar-bg-light: #f5f5f5;
-    /* Defined border color */
+    /* Corrected typo here */
     --sidebar-border-light: #dddddd;
     --input-bg-light: #ffffff;
     --input-border-light: #cccccc;
     --hover-light: rgba(0, 0, 0, 0.05);
     --mic-recording-light: #dc3545; /* Red for recording */
-    /* Added missing variables used by feature/social links */
-    --card-bg-light: #ffffff;
-    --hover-bg-light: #f0f0f0;
 
     /* Dark Mode Colors */
     --bg-color-dark: #1e1e1e;
@@ -33,9 +30,6 @@
     --input-border-dark: #444444;
     --hover-dark: rgba(255, 255, 255, 0.1);
     --mic-recording-dark: #e74c3c; /* Slightly brighter red for dark mode */
-    /* Added missing variables used by feature/social links */
-    --card-bg-dark: #2d2d2d;
-    --hover-bg-dark: #444444;
 
     /* New variables for new features */
     --timestamp-color: #888; /* Color for message timestamps */
@@ -110,7 +104,7 @@ body.dark-mode {
     /* Ensure correct positioning for RTL */
     right: 0;
     position: relative; /* Keep relative for desktop flow */
-     /* Custom Scrollbar for Sidebar */
+     /* Custom Scrollbar for Sidebar (can keep the simple one from original) */
      &::-webkit-scrollbar {
         width: 8px;
      }
@@ -118,7 +112,7 @@ body.dark-mode {
          background: var(--sidebar-bg-light);
      }
      &::-webkit-scrollbar-thumb {
-         background: #bbb; /* Lighter scrollbar */
+         background: #888; /* Default scrollbar color */
          border-radius: 10px;
      }
      body.dark-mode &::-webkit-scrollbar-track {
@@ -134,7 +128,7 @@ body.dark-mode #settings-sidebar {
     border-left-color: var(--sidebar-border-dark);
 }
 
-/* Sidebar Header to contain title and close button */
+/* New: Sidebar Header to contain title and close button */
 .sidebar-header {
     display: flex;
     justify-content: space-between; /* Space between title and button */
@@ -152,7 +146,6 @@ body.dark-mode .sidebar-header {
     text-align: center; /* Can override or keep based on header flex */
     margin: 0; /* Remove default h2 margin if using flex header */
     color: var(--accent-color-light);
-    flex-grow: 1; /* Allow title to take space */
 }
 
 body.dark-mode #settings-sidebar h2 {
@@ -162,13 +155,12 @@ body.dark-mode #settings-sidebar h2 {
 #settings-sidebar h3 {
     margin-bottom: var(--spacing-sm);
     font-size: 1.1rem;
-    border-bottom: 1px solid var(--sidebar-border-light);
-    padding-bottom: var(--spacing-xs);
-    color: var(--text-color-light); /* Ensure heading color matches theme */
+     /* Optional: Add border bottom like in newer CSS */
+     border-bottom: 1px solid var(--sidebar-border-light);
+     padding-bottom: var(--spacing-xs);
 }
 body.dark-mode #settings-sidebar h3 {
      border-bottom-color: var(--sidebar-border-dark);
-     color: var(--text-color-dark);
 }
 
 
@@ -176,72 +168,63 @@ body.dark-mode #settings-sidebar h3 {
     margin-bottom: var(--spacing-lg);
 }
 
-/* Organize sidebar sections with flex */
-#settings-sidebar {
-    display: flex;
-    flex-direction: column;
-}
-.conversations-section { order: 1; flex-grow: 1; display: flex; flex-direction: column; min-height: 150px; } /* Allow conv list to grow */
-.features-section { order: 2; }
-.settings-section { order: 4; } /* Settings after social */
-.sidebar-footer { order: 5; margin-top: auto; } /* Footer always last */
-
-/* Settings/Feature item flex alignment */
 .setting-item, .feature-item {
     margin-bottom: var(--spacing-md);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm); /* Gap between label and control */
+     /* Use flex to align label and control */
+     display: flex;
+     align-items: center;
+     justify-content: space-between; /* Push items to edges */
+     flex-wrap: wrap; /* Allow wrapping if needed */
 }
 
 .setting-item label {
+    display: block; /* Can keep display block if not using flex extensively */
+    margin-bottom: var(--spacing-xs); /* Margin below label */
     font-weight: 600;
-    flex-basis: auto; /* Let label size naturally */
-    margin: 0; /* Reset margin */
-    text-align: right; /* Ensure label text aligns right */
+    flex-grow: 1; /* Allow label to take space with flex */
+    margin-left: var(--spacing-sm); /* Margin left for RTL spacing from control */
 }
+/* If label remains block, remove flex on setting-item */
+/* If using flex, remove margin-bottom on label */
+.setting-item label { margin-bottom: 0; } /* Adjusted for flex */
+
 
 .feature-link {
     display: flex;
     align-items: center;
+    /* Adjusted padding slightly */
     padding: var(--spacing-sm) var(--spacing-md);
-    /* Use card background */
-    background-color: var(--card-bg-light);
+    background-color: var(--secondary-color-light); /* Using secondary as background */
     color: var(--text-color-light);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius); /* Use variable */
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
-    border: 1px solid var(--input-border-light);
+    border: 1px solid var(--input-border-light); /* Keep border from original */
     width: 100%; /* Make it full width */
-    gap: var(--spacing-sm); /* Gap between icon and text */
+    justify-content: space-between; /* Space out text and icon in RTL */
 }
 
 body.dark-mode .feature-link {
-    background-color: var(--card-bg-dark);
+    background-color: var(--secondary-color-dark);
     color: var(--text-color-dark);
     border-color: var(--input-border-dark);
 }
 
 .feature-link:hover {
-    /* Use hover background */
-    background-color: var(--hover-bg-light);
+    background-color: var(--hover-light); /* Use hover variable */
+    /* transform: translateY(-2px); */ /* Optional: remove transform */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 body.dark-mode .feature-link:hover {
-    background-color: var(--hover-bg-dark);
+    background-color: var(--hover-dark);
 }
 
 .feature-link i {
+    margin-left: 0; /* Remove old margin-left */
+    margin-right: var(--spacing-sm); /* Add margin-right for icon in RTL */
     color: var(--accent-color-light);
-    flex-shrink: 0; /* Prevent icon shrinking */
-}
-.feature-link span {
-    flex-grow: 1; /* Allow text to take space */
-    text-align: right;
 }
 
 body.dark-mode .feature-link i {
@@ -250,8 +233,8 @@ body.dark-mode .feature-link i {
 
 .setting-item select,
 .setting-item input[type="number"] {
-    width: auto;
-    min-width: 100px;
+    width: auto; /* Let it size based on content/min-width */
+    min-width: 100px; /* Minimum width */
     padding: var(--spacing-sm);
     border-radius: var(--border-radius);
     border: 1px solid var(--input-border-light);
@@ -259,7 +242,7 @@ body.dark-mode .feature-link i {
     color: var(--text-color-light);
     font-family: var(--font-family);
     transition: border-color var(--transition-speed), background-color var(--transition-speed), color var(--transition-speed);
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent shrinking in flex */
 }
 
 body.dark-mode .setting-item select,
@@ -273,22 +256,27 @@ body.dark-mode .setting-item input[type="number"] {
 .slider-container {
     display: flex;
     align-items: center;
+     /* Add padding/border/background here instead of on input[type="range"] */
     padding: var(--spacing-sm);
     background-color: var(--input-bg-light);
     border: 1px solid var(--input-border-light);
     border-radius: var(--border-radius);
+    flex-grow: 0; /* Prevent stretching */
     flex-shrink: 0;
-    min-width: 140px; /* Ensure enough width */
-    gap: var(--spacing-sm); /* Gap between slider and value */
+    width: auto; /* Adjust width */
+    min-width: 120px; /* Adjusted min-width */
 }
 body.dark-mode .slider-container {
      background-color: var(--input-bg-dark);
      border-color: var(--input-border-dark);
 }
 
+
 .slider-container input[type="range"] {
     flex-grow: 1;
-    margin: 0;
+    margin-left: 0; /* Remove old margin-left */
+    margin-right: var(--spacing-sm); /* Space between slider and value in RTL */
+     /* Remove padding, border, background from the input itself */
     padding: 0;
     border: none;
     background-color: transparent;
@@ -297,12 +285,13 @@ body.dark-mode .slider-container {
 .slider-container span {
     min-width: 30px;
     text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-color-light);
+    font-size: 0.9rem; /* Slightly smaller font for value */
+    color: var(--text-color-light); /* Use text color var */
 }
 body.dark-mode .slider-container span {
     color: var(--text-color-dark);
 }
+
 
 /* Toggle Switch */
 .switch {
@@ -310,31 +299,58 @@ body.dark-mode .slider-container span {
     display: inline-block;
     width: 50px;
     height: 24px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
 
 .slider {
-    position: absolute; cursor: pointer; top: 0; right: 0; left: 0; bottom: 0;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
     background-color: var(--secondary-color-light);
-    transition: var(--transition-speed); border-radius: 24px;
+    transition: var(--transition-speed);
+    border-radius: 24px;
 }
+
 .slider:before {
-    position: absolute; content: ""; height: 16px; width: 16px;
-    right: 4px; bottom: 4px; background-color: white;
-    transition: var(--transition-speed); border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    right: 4px; /* Initial position in RTL */
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition-speed);
+    border-radius: 50%;
 }
-input:checked + .slider { background-color: var(--accent-color-light); }
-body.dark-mode input:checked + .slider { background-color: var(--accent-color-dark); }
-input:checked + .slider:before { transform: translateX(-26px); }
+
+input:checked + .slider {
+    background-color: var(--accent-color-light);
+}
+
+body.dark-mode input:checked + .slider {
+    background-color: var(--accent-color-dark);
+}
+
+input:checked + .slider:before {
+    transform: translateX(-26px); /* Move to the left in RTL */
+}
 
 /* Conversations List */
 .conversations-container {
     margin-top: var(--spacing-sm);
-    /* flex-grow: 1; Moved to parent section */
+    max-height: 300px; /* Keep original max height */
     overflow-y: auto;
-    padding-left: var(--spacing-xs);
+     /* Ensure scrollbar is visible */
+     padding-left: var(--spacing-xs); /* Add padding to prevent content hiding under scrollbar */
 }
 
 .conversation-item {
@@ -346,538 +362,1137 @@ input:checked + .slider:before { transform: translateX(-26px); }
     justify-content: space-between;
     align-items: center;
     transition: background-color var(--transition-speed);
-    flex-direction: row; /* Reset direction for content */
-    border: 1px solid transparent;
-    position: relative;
-    overflow: hidden;
+     /* Ensure flex-items handle space correctly in RTL */
+     flex-direction: row-reverse; /* Reverse order to put actions on the left in RTL */
+     /* Optional: Add border to prevent size jump on active */
+     border: 1px solid transparent;
+     position: relative; /* Needed for loading state spinner */
+     overflow: hidden; /* Hide overflow of spinner */
 }
 
-.conversation-item:hover { background-color: var(--hover-light); }
-body.dark-mode .conversation-item:hover { background-color: var(--hover-dark); }
-.conversation-item.active { background-color: var(--accent-color-light); color: white; }
-body.dark-mode .conversation-item.active { background-color: var(--accent-color-dark); }
+.conversation-item:hover {
+    background-color: var(--hover-light);
+}
 
-/* Loading state for conversation item */
-.conversation-item.loading { opacity: 0.7; pointer-events: none; }
+body.dark-mode .conversation-item:hover {
+    background-color: var(--hover-dark);
+}
+
+.conversation-item.active {
+    background-color: var(--accent-color-light);
+    color: white;
+}
+
+body.dark-mode .conversation-item.active {
+    background-color: var(--accent-color-dark);
+}
+
+/* New: Loading state for conversation item */
+.conversation-item.loading {
+    opacity: 0.7; /* Dim slightly */
+    pointer-events: none; /* Prevent clicks */
+}
 .conversation-item.loading::after {
-    content: ""; position: absolute; top: 50%; left: 10px; /* Position spinner on left */
-    transform: translateY(-50%); border: 3px solid rgba(0, 0, 0, 0.1);
-    border-left-color: var(--accent-color-light); /* Spinner color */
-    border-radius: 50%; width: 16px; height: 16px;
-    animation: spin 1s linear infinite; z-index: 1;
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white; /* Spinner color */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    z-index: 1;
 }
-body.dark-mode .conversation-item.loading::after { border-left-color: var(--accent-color-dark); border-color: rgba(255,255,255, 0.1); }
+body.dark-mode .conversation-item.loading::after {
+     border-top-color: var(--accent-color-dark);
+     border-color: rgba(var(--accent-color-dark-rgb, 77, 171, 247), 0.3); /* Use RGB if available, fallback to rgba */
+}
+
 
 .conversation-actions {
-    display: flex; gap: var(--spacing-xs); flex-shrink: 0;
-    margin-right: var(--spacing-sm); /* Space from text */
-    opacity: 0; transition: opacity 0.15s ease; z-index: 1;
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-shrink: 0; /* Prevent icons from pushing text */
+     /* Adjust positioning for RTL */
+     margin-left: 0; /* Remove old margin */
+     margin-right: var(--spacing-sm); /* Space between text and actions */
+     /* Optional: Hide actions until hover for cleaner look */
+     opacity: 0;
+     transition: opacity 0.15s ease;
+     z-index: 1; /* Ensure actions are clickable */
 }
+/* Show actions on hover or if item is active */
 .conversation-item:hover .conversation-actions,
-.conversation-item.active .conversation-actions { opacity: 1; }
+.conversation-item.active .conversation-actions {
+    opacity: 1;
+}
+
 
 .conversation-item span {
-    flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-align: right; min-width: 0;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* margin-left: var(--spacing-sm); */ /* Removed old margin */
+     /* Ensure text aligns correctly in RTL */
+    text-align: right;
+     /* Allow text to shrink without pushing actions out */
+     min-width: 0;
 }
 
+
 .empty-state {
-    text-align: center; color: #888; padding: var(--spacing-md); font-style: italic;
-    display: flex; flex-direction: column; align-items: center; flex-grow: 1; justify-content: center; /* Center vertically */
+    text-align: center;
+    color: #888;
+    padding: var(--spacing-md);
+    font-style: italic;
+     /* New: Use flex for centering icon and text */
+     display: flex;
+     flex-direction: column;
+     align-items: center;
 }
-.empty-state i { margin-bottom: var(--spacing-sm); font-size: 1.5rem; color: #bbb; }
-.empty-state.loading i { color: var(--loading-spinner-color-light); }
-body.dark-mode .empty-state.loading i { color: var(--loading-spinner-color-dark); }
-.empty-state.error i { color: var(--error-bg-light); } /* Use error colors */
-body.dark-mode .empty-state.error i { color: var(--error-bg-dark); }
+/* New: Styling for icon in empty state */
+.empty-state i {
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.5rem;
+    color: #bbb; /* Muted color */
+}
+/* New: Styling for loading state text/icon color */
+.empty-state.loading-conversations i,
+.empty-state.loading-messages i {
+     color: var(--loading-spinner-color-light);
+}
+body.dark-mode .empty-state.loading-conversations i,
+body.dark-mode .empty-state.loading-messages i {
+     color: var(--loading-spinner-color-dark);
+}
+/* New: Styling for error state text/icon color */
+.empty-state.error-state i {
+     color: var(--error-color-light);
+}
+body.dark-mode .empty-state.error-state i {
+     color: var(--error-color-dark);
+}
+
 
 /* Buttons */
 .primary-button {
-    width: 100%; padding: var(--spacing-md); background-color: var(--accent-color-light);
-    color: white; border: none; border-radius: var(--border-radius); font-family: var(--font-family);
-    font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center;
-    gap: var(--spacing-sm); margin-bottom: var(--spacing-md); transition: background-color var(--transition-speed);
-}
-body.dark-mode .primary-button { background-color: var(--accent-color-dark); }
-.primary-button:hover { opacity: 0.9; }
-.primary-button:active { transform: scale(0.98); }
-
-.icon-button {
-    background: none; border: none; cursor: pointer; color: var(--text-color-light);
-    padding: var(--spacing-xs); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    transition: background-color var(--transition-speed), color var(--transition-speed);
-    width: 32px; height: 32px; /* Ensure consistent size */
-}
-body.dark-mode .icon-button { color: var(--text-color-dark); }
-.icon-button:hover { background-color: var(--hover-light); }
-body.dark-mode .icon-button:hover { background-color: var(--hover-dark); }
-.icon-button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.danger-button {
-    background-color: #dc3545; color: white; border: none; border-radius: var(--border-radius);
-    padding: var(--spacing-sm) var(--spacing-md); cursor: pointer; font-family: var(--font-family);
+    width: 100%;
+    padding: var(--spacing-md);
+    background-color: var(--accent-color-light);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: var(--font-family);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
     transition: background-color var(--transition-speed);
 }
-.danger-button:hover { background-color: #c82333; }
 
-/* START: New Social Media Links Styles */
-.social-links {
-    display: flex;
-    flex-direction: column; /* Stack vertically */
-    gap: var(--spacing-sm); /* Space between links */
-    margin-top: var(--spacing-sm);
+body.dark-mode .primary-button {
+    background-color: var(--accent-color-dark);
 }
 
-.social-link {
+.primary-button:hover {
+    opacity: 0.9;
+}
+
+.primary-button:active {
+    transform: scale(0.98);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color-light);
+    padding: var(--spacing-xs);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    padding: 8px 12px;
-    background-color: var(--secondary-color-light); /* Use secondary color */
-    color: var(--text-color-light);
-    border-radius: var(--border-radius);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: 1px solid var(--input-border-light);
-    gap: var(--spacing-sm); /* Gap between icon and text */
+    justify-content: center;
+    transition: background-color var(--transition-speed), color var(--transition-speed); /* Added color transition */
 }
 
-body.dark-mode .social-link {
-    background-color: var(--secondary-color-dark);
+body.dark-mode .icon-button {
     color: var(--text-color-dark);
-    border-color: var(--input-border-dark);
 }
 
-.social-link:hover {
+.icon-button:hover {
     background-color: var(--hover-light);
-    transform: translateY(-1px); /* Smaller lift */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    color: var(--accent-color-light);
 }
 
-body.dark-mode .social-link:hover {
+body.dark-mode .icon-button:hover {
     background-color: var(--hover-dark);
-    color: var(--accent-color-dark);
+}
+/* New: Disabled state for icon buttons */
+.icon-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.social-link i {
-    width: 20px;
-    text-align: center;
-    color: var(--accent-color-light);
-    flex-shrink: 0;
+
+.danger-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: background-color var(--transition-speed);
 }
 
-body.dark-mode .social-link i {
-    color: var(--accent-color-dark);
+.danger-button:hover {
+    background-color: #c82333;
 }
-
-.social-link span {
-    flex-grow: 1;
-    text-align: right;
-}
-
-/* Ensure Font Awesome brands are styled correctly */
-.fab {
-    font-family: 'Font Awesome 6 Brands', 'Font Awesome 6 Free'; /* Add fallback */
-    font-weight: 400; /* Brands are usually in regular weight */
-}
-/* --- END: Social Media Links Styles --- */
-
 
 /* Sidebar Footer */
 .sidebar-footer {
+    margin-top: auto;
     padding-top: var(--spacing-md);
+     /* Optional: Add border top like in newer CSS */
     border-top: 1px solid var(--sidebar-border-light);
-    display: flex; justify-content: space-between; align-items: center;
-    color: #888; font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #888;
+    font-size: 0.9rem;
 }
-body.dark-mode .sidebar-footer { border-top-color: var(--sidebar-border-dark); }
+body.dark-mode .sidebar-footer {
+    border-top-color: var(--sidebar-border-dark);
+}
 
-/* Sidebar close button (Mobile only) */
-#close-sidebar {
-    display: none; /* Hidden by default, shown in media query */
-    /* Inherits icon-button styles */
-}
 
 /* --- Chat Container --- */
 #chat-container {
-    flex-grow: 1; display: flex; flex-direction: column; height: 100%;
-    position: relative; overflow: hidden;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow: hidden; /* Prevent overflow issues with message bubbles */
 }
 
 /* --- Header and Footer Styles --- */
-.chat-header, .chat-footer {
-    flex-shrink: 0; padding: var(--spacing-sm) var(--spacing-lg); text-align: center;
-    background-color: var(--primary-color-light); color: var(--text-color-light);
+.chat-header,
+.chat-footer {
+    flex-shrink: 0; /* Prevent shrinking */
+    padding: var(--spacing-sm) var(--spacing-lg); /* Padding top/bottom, left/right */
+    text-align: center; /* Center text */
+    background-color: var(--primary-color-light); /* Subtle background */
+    color: var(--text-color-light);
     transition: background-color var(--transition-speed), color var(--transition-speed);
-    z-index: 5; position: relative; /* Ensure stacking context */
+     /* New: Add z-index to ensure it's above messages */
+    z-index: 5;
 }
-body.dark-mode .chat-header, body.dark-mode .chat-footer {
-    background-color: var(--primary-color-dark); color: var(--text-color-dark);
-}
-.chat-header { border-bottom: 1px solid var(--secondary-color-light); }
-body.dark-mode .chat-header { border-bottom-color: var(--secondary-color-dark); }
-.chat-header h2 {
-    margin-bottom: var(--spacing-xs); font-size: 1.1rem; color: inherit;
-    display: inline-block; margin-right: var(--spacing-sm);
-}
-.chat-header .version { font-size: 0.8em; opacity: 0.8; margin-right: var(--spacing-xs); }
-.chat-header p, .chat-footer p { font-size: 0.9rem; margin: 0; color: #888; }
-body.dark-mode .chat-header p, body.dark-mode .chat-footer p { color: #bbb; }
-.chat-footer { border-top: 1px solid var(--secondary-color-light); margin-top: auto; }
-body.dark-mode .chat-footer { border-top-color: var(--secondary-color-dark); }
 
-/* Overlay for mobile sidebar */
-#sidebar-overlay {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4); z-index: 9;
-    transition: opacity var(--transition-speed) ease; opacity: 0;
+body.dark-mode .chat-header,
+body.dark-mode .chat-footer {
+    background-color: var(--primary-color-dark);
+    color: var(--text-color-dark);
 }
-#sidebar-overlay.show { display: block; opacity: 1; }
+
+.chat-header {
+    border-bottom: 1px solid var(--secondary-color-light); /* Separator */
+}
+
+body.dark-mode .chat-header {
+    border-bottom-color: var(--secondary-color-dark);
+}
+
+.chat-header h2 {
+    margin-bottom: var(--spacing-xs); /* Space below title */
+    font-size: 1.1rem;
+    color: inherit; /* Use parent color */
+    display: inline-block; /* Allow version to be on same line */
+    /* Adjust margin for RTL */
+    margin-left: 0;
+    margin-right: var(--spacing-sm); /* Space between title and version/author in RTL */
+}
+
+.chat-header .version {
+     font-size: 0.8em; /* Make version slightly smaller than title */
+     opacity: 0.8;
+     /* Adjust margin for RTL */
+     margin-left: 0;
+     margin-right: var(--spacing-xs); /* Space after version in RTL */
+}
+
+.chat-header p,
+.chat-footer p {
+    font-size: 0.9rem;
+    margin: 0; /* Remove default paragraph margin */
+    color: #888; /* Muted color */
+}
+
+body.dark-mode .chat-header p,
+body.dark-mode .chat-footer p {
+    color: #bbb; /* Slightly lighter muted color */
+}
+
+.chat-footer {
+    border-top: 1px solid var(--secondary-color-light); /* Separator */
+    margin-top: auto; /* Push to the bottom if needed (though flex takes care of it) */
+     /* New: Add z-index */
+    z-index: 5;
+}
+
+body.dark-mode .chat-footer {
+    border-top-color: var(--secondary-color-dark);
+}
+
+/* New: Overlay for mobile sidebar */
+#sidebar-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent dark overlay */
+    z-index: 9; /* Below sidebar (z-index 10), above chat content */
+    transition: opacity var(--transition-speed) ease;
+    opacity: 0;
+}
+#sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
 
 /* Offline Indicator */
 #offline-indicator {
-    display: none; /* Controlled by JS */
-    position: absolute; top: calc(50px + var(--spacing-sm)); /* Approx header height + spacing */
-    left: 50%; transform: translateX(-50%); background-color: #ffc107;
-    color: #333; padding: var(--spacing-xs) var(--spacing-sm); border-radius: 15px;
-    font-size: 0.9rem; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    opacity: 0; transition: opacity var(--transition-speed); pointer-events: none;
-    display: flex; align-items: center; gap: var(--spacing-xs);
-    min-width: 150px; justify-content: center;
+    display: none; /* Hidden by default, controlled by JS */
+    position: absolute;
+    top: calc(var(--chat-header-height) + var(--spacing-md)); /* Position below header */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    background-color: #ffc107; /* Warning color */
+    color: #333;
+    padding: var(--spacing-xs) var(--spacing-sm); /* Adjusted padding */
+    border-radius: 15px;
+    font-size: 0.9rem;
+    z-index: 100; /* High z-index */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+    pointer-events: none; /* Non-interactive */
+     /* New: Flex for centering content */
+     display: flex;
+     align-items: center;
+     gap: var(--spacing-xs);
+     min-width: 150px; /* Ensure visibility */
+     justify-content: center;
 }
-#offline-indicator.visible { display: flex; opacity: 1; }
-#offline-indicator i { margin-right: var(--spacing-xs); }
 
-/* Global App Error Message */
+#offline-indicator.visible {
+    display: flex; /* Use flex when visible */
+    opacity: 1;
+}
+
+#offline-indicator i {
+    /* Adjusted margin for RTL */
+    margin-left: 0;
+    margin-right: var(--spacing-xs);
+}
+
+/* New: Global App Error Message */
 #app-error-message {
-    position: fixed; bottom: 20px; /* Default, updated by JS */
-    left: 50%; transform: translateX(-50%); background-color: var(--error-bg-light);
-    color: var(--error-text-light); /* Text color for light mode */
-    padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius);
-    font-size: 0.9rem; z-index: 110; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    opacity: 0; visibility: hidden;
-    transition: opacity 0.4s ease, bottom 0.4s ease, background-color var(--transition-speed), color var(--transition-speed);
-    display: flex; align-items: center; gap: var(--spacing-sm); /* Increased gap */
-    pointer-events: none; max-width: 90%; text-align: right;
+    position: fixed;
+    /* Bottom position adjusted by JS based on input area/regenerate button */
+    bottom: 20px; /* Default/fallback position */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    background-color: var(--error-color-light); /* Error color */
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    z-index: 110; /* Higher than offline indicator */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    opacity: 0;
+    visibility: hidden; /* Hide completely when not shown */
+    transition: opacity 0.4s ease, bottom 0.4s ease; /* Smooth transition for showing/hiding and position changes */
+    display: flex; /* Use flex for icon and text */
+    align-items: center;
+    gap: var(--spacing-xs);
+    pointer-events: none; /* Non-interactive */
+    max-width: 90%; /* Limit width */
+    text-align: right; /* Ensure text alignment */
 }
 body.dark-mode #app-error-message {
-    background-color: var(--error-bg-dark);
-    color: var(--error-text-dark); /* Text color for dark mode */
+    background-color: var(--error-color-dark);
 }
-#app-error-message.show { opacity: 1; visibility: visible; }
-#app-error-message i { font-size: 1.1rem; flex-shrink: 0; }
+#app-error-message.show {
+    opacity: 1;
+    visibility: visible;
+    /* Bottom position is updated by JS */
+}
 
 
 /* Messages Container */
 #messages {
-    flex-grow: 1; overflow-y: auto; padding: var(--spacing-lg);
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
     background-color: var(--primary-color-light);
     transition: background-color var(--transition-speed);
-    display: flex; flex-direction: column; gap: var(--spacing-md);
-     /* Custom scrollbar */
-     &::-webkit-scrollbar { width: 8px; }
-     &::-webkit-scrollbar-track { background: var(--primary-color-light); }
-     &::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-     body.dark-mode &::-webkit-scrollbar-track { background: var(--primary-color-dark); }
-     body.dark-mode &::-webkit-scrollbar-thumb { background: #555; }
+    display: flex;
+    flex-direction: column;
+    /* New: Add gap between messages */
+    gap: var(--spacing-md);
 }
-body.dark-mode #messages { background-color: var(--primary-color-dark); }
+
+body.dark-mode #messages {
+    background-color: var(--primary-color-dark);
+}
 
 /* Message Bubbles */
 .message-bubble {
-    max-width: 80%; padding: var(--spacing-md); border-radius: 15px;
-    position: relative; line-height: 1.6; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    word-wrap: break-word; white-space: pre-wrap;
+    max-width: 80%; /* Keep original width */
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    /* margin-bottom: var(--spacing-lg); */ /* Remove static margin-bottom to use gap */
+    position: relative;
+    line-height: 1.6;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    word-wrap: break-word;
+    white-space: pre-wrap;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    padding-bottom: calc(var(--spacing-md) + 18px); /* Increased space for actions/time */
+     /* New: Add padding at the bottom to make space for timestamp and actions */
+    padding-bottom: calc(var(--spacing-md) + 15px); /* Adjust based on desired space */
 }
-#messages > .message-bubble:last-child { margin-bottom: var(--spacing-sm); } /* Small margin at end */
+/* New: Add a bottom margin to the last bubble if using gap */
+#messages > .message-bubble:last-child {
+     margin-bottom: var(--spacing-lg); /* Add margin to the very last one */
+}
+
 
 .user-bubble {
-    background-color: var(--user-bubble-light); color: var(--text-color-light); /* Adjusted color */
-    margin-right: auto; /* Align left in RTL */ margin-left: 0;
-    border-bottom-left-radius: 5px; text-align: right;
+    background-color: var(--user-bubble-light);
+    color: #052c65;
+    margin-left: auto; /* Push to the left in RTL */
+    margin-right: 0; /* Ensure no default margin right */
+    border-bottom-left-radius: 5px;
+    text-align: right;
 }
-body.dark-mode .user-bubble { background-color: var(--user-bubble-dark); color: var(--text-color-dark); }
+
+body.dark-mode .user-bubble {
+    background-color: var(--user-bubble-dark);
+    color: var(--text-color-dark);
+}
 
 .ai-bubble {
-    background-color: var(--ai-bubble-light); color: var(--text-color-light);
-    margin-left: auto; /* Align right in RTL */ margin-right: 0;
-    border-bottom-right-radius: 5px; text-align: right;
+    background-color: var(--ai-bubble-light);
+    color: var(--text-color-light);
+    margin-right: auto; /* Push to the right in RTL */
+    margin-left: 0; /* Ensure no default margin left */
+    border-bottom-right-radius: 5px;
+    text-align: right;
 }
-body.dark-mode .ai-bubble { background-color: var(--ai-bubble-dark); color: var(--text-color-dark); }
 
-/* Message Timestamp */
-.message-timestamp {
-    position: absolute; bottom: var(--spacing-xs); right: var(--spacing-md); /* Right align */
-    font-size: 0.7rem; color: var(--timestamp-color); opacity: 0;
-    transition: opacity 0.15s ease; direction: ltr; /* Keep LTR for time */
+body.dark-mode .ai-bubble {
+    background-color: var(--ai-bubble-dark);
+    color: var(--text-color-dark);
 }
-.user-bubble .message-timestamp { left: var(--spacing-md); right: auto; } /* Left align for user */
-.message-bubble:hover .message-timestamp { opacity: 0.7; } /* Show on hover */
+
+/* New: Message Timestamp */
+.message-timestamp {
+    position: absolute;
+    bottom: var(--spacing-xs); /* 4px from bottom */
+    right: var(--spacing-md); /* 16px from right in RTL */
+    font-size: 0.7rem; /* Smaller font size */
+    color: var(--timestamp-color); /* Use timestamp color var */
+    opacity: 0; /* Hidden by default, shown on hover */
+    transition: opacity 0.15s ease;
+    direction: ltr; /* Display time LTR */
+}
+body.dark-mode .message-timestamp {
+    color: var(--timestamp-color); /* Same color for dark mode for consistency */
+}
+/* Position timestamp for user bubble (on the left) */
+.user-bubble .message-timestamp {
+    left: var(--spacing-md); /* 16px from left */
+    right: auto; /* Disable right positioning */
+}
+
 
 /* Message Actions (Copy, Speak, Vote) */
 .message-actions {
-    position: absolute; bottom: var(--spacing-xs); left: var(--spacing-md); /* Left align for AI */
-    display: flex; gap: var(--spacing-xs); opacity: 0; /* Hidden by default */
-    transition: opacity 0.15s ease; z-index: 2;
+    position: absolute;
+    bottom: var(--spacing-xs); /* 4px from bottom */
+    left: var(--spacing-md); /* 16px from left in RTL (for AI bubbles) */
+    display: flex;
+    gap: var(--spacing-xs);
+    opacity: 0.5; /* More subtle when not hovered (from original) */
+    transition: opacity var(--transition-speed);
+     z-index: 2; /* Ensure actions are clickable over timestamp */
 }
-.user-bubble .message-actions { right: var(--spacing-md); left: auto; } /* Right align for user */
-.message-bubble:hover .message-actions { opacity: 1; } /* Show on hover */
+
+.message-bubble:hover .message-actions {
+    opacity: 1; /* Full visibility on hover */
+}
+/* New: Position actions for user bubble (on the right) */
+.user-bubble .message-actions {
+     right: var(--spacing-md); /* 16px from right */
+     left: auto; /* Disable left positioning */
+     justify-content: flex-end; /* Align actions to the right in RTL user bubble */
+}
+
 
 .message-actions button {
-    background: none; border: none; cursor: pointer; padding: var(--spacing-xs);
-    border-radius: 50%; color: inherit; opacity: 0.7; /* Default opacity */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    color: inherit; /* Inherit color from bubble text */
+    opacity: 0.6; /* Less prominent (from original) */
     transition: opacity var(--transition-speed), background-color var(--transition-speed);
-    display: flex; align-items: center; justify-content: center; /* Center icon */
-    width: 28px; height: 28px; /* Slightly smaller action buttons */
 }
-.message-actions button:hover { opacity: 1; background-color: rgba(0,0,0,0.05); }
-body.dark-mode .message-actions button:hover { background-color: rgba(255,255,255,0.1); }
-.message-actions button i.fa-volume-high { color: var(--accent-color-light); }
-body.dark-mode .message-actions button i.fa-volume-high { color: var(--accent-color-dark); }
 
-/* Vote buttons */
-.vote-buttons { display: flex; gap: var(--spacing-xs); align-items: center; }
-.vote-buttons button { color: var(--timestamp-color); opacity: 0.7; }
-.vote-buttons button:hover { opacity: 1; }
-.vote-buttons button.liked i { color: var(--like-color); }
-.vote-buttons button.disliked i { color: var(--dislike-color); }
-.vote-buttons button:disabled { opacity: 1; cursor: default; pointer-events: none; background: none; }
-.vote-buttons button:disabled:hover { background: none; }
+.message-actions button:hover {
+    opacity: 1;
+    background-color: rgba(0,0,0,0.05);
+}
 
-/* Error Message Bubble */
+body.dark-mode .message-actions button:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+/* New: Styling for active speak button icon */
+.message-actions button i.fa-volume-high {
+    color: var(--accent-color-light); /* Use accent color for active state */
+}
+body.dark-mode .message-actions button i.fa-volume-high {
+    color: var(--accent-color-dark);
+}
+
+/* New: Specific styles for Vote buttons container */
+.vote-buttons {
+    display: flex;
+    gap: var(--spacing-xs); /* Space between like/dislike */
+    align-items: center;
+    margin-left: var(--spacing-sm); /* Space from copy/speak buttons */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+/* New: Styling for vote button icons */
+.vote-buttons button {
+     color: var(--timestamp-color); /* Default color is muted like timestamp */
+     transition: color 0.15s ease, transform 0.1s ease;
+     /* Remove default button padding/border/background */
+     background: none;
+     border: none;
+     padding: var(--spacing-xs);
+}
+.vote-buttons button:hover {
+     opacity: 1; /* Full opacity on hover */
+     background-color: rgba(0,0,0,0.05); /* Subtle hover effect */
+}
+body.dark-mode .vote-buttons button:hover {
+     background-color: rgba(255,255,255,0.1);
+}
+/* New: Active state colors for vote buttons */
+.vote-buttons button.liked i {
+    color: var(--like-color); /* Green */
+}
+.vote-buttons button.disliked i {
+    color: var(--dislike-color); /* Red */
+}
+/* New: Disabled state after voting */
+.vote-buttons button:disabled {
+     opacity: 1; /* Keep color visible */
+     cursor: default;
+     pointer-events: none; /* Prevent further clicks */
+     background: none; /* Remove hover background if disabled while hovered */
+}
+.vote-buttons button:disabled:hover {
+     background: none; /* Ensure no hover effect when disabled */
+}
+
+
+/* New: Error Message Bubble */
 .message-bubble.error-bubble {
-    background-color: var(--error-bg-light); color: var(--error-text-light);
-    border: 1px solid var(--error-text-light); border-radius: var(--border-radius);
-    margin-right: auto; margin-left: auto; max-width: 95%; padding: var(--spacing-md);
-    display: flex; align-items: center; gap: var(--spacing-sm);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: right;
-    padding-bottom: var(--spacing-md); /* Reset padding */
+    background-color: var(--error-bg-light); /* Light red */
+    color: var(--error-text-light); /* Dark red text */
+    border: 1px solid #f5c6cb;
+    border-radius: var(--border-radius); /* Fully rounded corners */
+    margin-right: auto; /* Center align in RTL */
+    margin-left: auto;
+    max-width: 95%; /* Wider than normal bubbles */
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: right;
+    /* Remove padding added for timestamp/actions as they are not on error bubbles */
+    padding-bottom: var(--spacing-md);
 }
 body.dark-mode .message-bubble.error-bubble {
-    background-color: var(--error-bg-dark); color: var(--error-text-dark); border-color: var(--error-text-dark);
+    background-color: var(--error-bg-dark);
+    color: var(--error-text-dark);
+    border-color: #f5c6cb; /* Can keep same border or change */
 }
-.message-bubble.error-bubble i { flex-shrink: 0; font-size: 1.2rem; }
+.message-bubble.error-bubble i {
+    flex-shrink: 0; /* Prevent icon from shrinking */
+    font-size: 1.2rem;
+}
+
 
 /* Typing Indicator */
 .typing-indicator-bubble {
-    max-width: 80px; /* Small bubble for just dots */
-    margin-left: auto; margin-right: 0; /* Align right */
-    padding: var(--spacing-sm) var(--spacing-md); /* Adjust padding */
-    border-radius: 15px; border-bottom-right-radius: 5px;
-    background-color: var(--ai-bubble-light); box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    padding-bottom: var(--spacing-sm); /* Reset padding */
-    display: flex; align-items: center; justify-content: center; /* Center dots */
-    direction: ltr; /* Ensure dots animate LTR */
+     /* Base styles similar to AI bubble */
+    max-width: 80%; /* Match AI bubble width */
+    margin-right: auto; /* Match AI bubble alignment */
+    margin-left: 0;
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    border-bottom-right-radius: 5px;
+    background-color: var(--ai-bubble-light);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    /* Remove padding added for timestamp/actions */
+    padding-bottom: var(--spacing-md);
+     /* New: Use flex for the indicator dots */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align dots to the right in RTL bubble */
+    direction: ltr; /* Ensure dots animate left-to-right */
 }
-body.dark-mode .typing-indicator-bubble { background-color: var(--ai-bubble-dark); }
-.typing-indicator { display: flex; align-items: center; } /* Removed margin */
-.typing-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-    background-color: #aaa; /* Slightly darker dots */
-    margin-left: 3px; animation: typingAnimation 1.4s infinite; }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typingAnimation { /* Kept original animation */
+body.dark-mode .typing-indicator-bubble {
+     background-color: var(--ai-bubble-dark);
+}
+
+.typing-indicator {
+    /* flex container already on typing-indicator-bubble */
+    display: flex; /* Redundant but safe */
+    align-items: center; /* Redundant but safe */
+    margin-right: var(--spacing-md); /* Space before typing dots */
+}
+
+.typing-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #888;
+    margin-left: 3px;
+    animation: typingAnimation 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
     0% { opacity: 0.3; transform: translateY(0); }
     50% { opacity: 1; transform: translateY(-5px); }
     100% { opacity: 0.3; transform: translateY(0); }
 }
 
-/* Regenerate Button */
+/* New: Regenerate Button */
 #regenerate-button {
-    display: none; /* Controlled by JS */
-    align-items: center; justify-content: center; gap: var(--spacing-xs);
-    margin: 0 auto var(--spacing-md); /* Center below messages */
+    display: flex; /* Controlled by JS */
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-md) auto; /* Center horizontally, add margin above and below */
     padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--secondary-color-light); color: var(--text-color-light);
-    border: 1px solid var(--input-border-light); /* Add subtle border */
-    border-radius: var(--border-radius); font-family: var(--font-family);
-    font-size: 0.9rem; cursor: pointer;
-    transition: background-color var(--transition-speed), transform var(--transition-speed), color var(--transition-speed);
-    flex-shrink: 0;
+    background-color: var(--secondary-color-light);
+    color: var(--text-color-light);
+    border: none; /* Keep original border: none */
+    border-radius: var(--border-radius);
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform var(--transition-speed);
+    flex-shrink: 0; /* Prevent shrinking */
 }
 body.dark-mode #regenerate-button {
-    background-color: var(--secondary-color-dark); color: var(--text-color-dark); border-color: var(--input-border-dark);
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
 }
 #regenerate-button:hover {
-    background-color: var(--accent-color-light); color: white; border-color: var(--accent-color-light);
+    background-color: var(--accent-color-light); /* Change color on hover */
+    color: white;
 }
 body.dark-mode #regenerate-button:hover {
-    background-color: var(--accent-color-dark); border-color: var(--accent-color-dark);
+    background-color: var(--accent-color-dark);
 }
-#regenerate-button:active { transform: scale(0.98); }
+#regenerate-button:active {
+    transform: scale(0.98);
+}
+
 
 /* Input Area */
 #input-area {
-    padding: var(--spacing-sm) var(--spacing-md); /* Adjusted padding */
+    padding: var(--spacing-md);
     background-color: var(--bg-color-light);
     border-top: 1px solid var(--secondary-color-light);
     transition: background-color var(--transition-speed), border-color var(--transition-speed);
-    flex-shrink: 0; position: relative; /* For potential elements above */
+    flex-shrink: 0; /* Prevent shrinking */
 }
+
 body.dark-mode #input-area {
-    background-color: var(--bg-color-dark); border-top-color: var(--secondary-color-dark);
+    background-color: var(--bg-color-dark);
+    border-top-color: var(--secondary-color-dark);
 }
+
 #input-container {
-    display: flex; align-items: flex-end; /* Align items to bottom for multiline */
-    background-color: var(--input-bg-light); border: 1px solid var(--input-border-light);
-    border-radius: var(--border-radius); padding: var(--spacing-xs) var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    background-color: var(--input-bg-light);
+    border: 1px solid var(--input-border-light);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xs) var(--spacing-sm);
     transition: background-color var(--transition-speed), border-color var(--transition-speed);
-    gap: var(--spacing-xs); /* Gap between elements */
 }
+
 body.dark-mode #input-container {
-    background-color: var(--input-bg-dark); border-color: var(--input-border-dark);
+    background-color: var(--input-bg-dark);
+    border-color: var(--input-border-dark);
 }
+
 #message-input {
-    flex-grow: 1; border: none; outline: none; padding: var(--spacing-sm);
-    background-color: transparent; color: var(--text-color-light); font-family: var(--font-family);
-    resize: none; min-height: 40px; max-height: 150px; /* Reduced max height slightly */
-    transition: color var(--transition-speed); text-align: right; direction: rtl;
-    line-height: 1.5; /* Adjust line height */
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: var(--spacing-sm);
+    background-color: transparent;
+    color: var(--text-color-light);
+    font-family: var(--font-family);
+    resize: none;
+    min-height: 40px;
+    max-height: 200px;
+    transition: color var(--transition-speed);
+     /* Ensure correct text alignment and direction */
+    text-align: right;
+    direction: rtl;
 }
-body.dark-mode #message-input { color: var(--text-color-dark); }
-#message-input::placeholder { color: #999; }
-body.dark-mode #message-input::placeholder { color: #777; }
+
+body.dark-mode #message-input {
+    color: var(--text-color-dark);
+}
+
+#message-input::placeholder {
+    color: #999;
+}
+
+body.dark-mode #message-input::placeholder {
+    color: #777;
+}
 
 #send-button {
-    border: none; background-color: var(--accent-color-light); color: white;
-    width: 36px; height: 36px; /* Slightly larger send button */
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; margin: 0; /* Reset margin */
+    border: none;
+    background-color: var(--accent-color-light);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    /* Adjust margin for RTL */
+    margin-right: 0;
+    margin-left: var(--spacing-xs);
     transition: background-color var(--transition-speed), transform var(--transition-speed);
-    flex-shrink: 0; align-self: flex-end; /* Align with bottom */ margin-bottom: 2px; /* Align baseline */
+    flex-shrink: 0; /* Prevent shrinking */
 }
-body.dark-mode #send-button { background-color: var(--accent-color-dark); }
-#send-button:hover { opacity: 0.9; }
-#send-button:active { transform: scale(0.95); }
-#send-button:disabled { background-color: #ccc; cursor: not-allowed; }
-body.dark-mode #send-button:disabled { background-color: #555; }
+
+body.dark-mode #send-button {
+    background-color: var(--accent-color-dark);
+}
+
+#send-button:hover {
+    opacity: 0.9;
+}
+
+#send-button:active {
+    transform: scale(0.95);
+}
+
+#send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+     /* Optional: match dark mode disabled color */
+     body.dark-mode & {
+         background-color: #555;
+     }
+}
+
 
 /* Input Footer */
 .input-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: var(--spacing-xs); padding: 0 var(--spacing-xs); text-align: right;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-xs);
+    padding: 0 var(--spacing-xs);
+     /* Ensure text alignment in footer */
+    text-align: right;
 }
-.typing-hint { font-size: 0.8rem; color: #888; }
-body.dark-mode .typing-hint { color: #777; }
+
+.typing-hint {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+body.dark-mode .typing-hint {
+    color: #777;
+}
 
 /* Mobile Menu (Button to open sidebar on mobile) */
 #mobile-menu {
-    display: none; /* Hidden by default, shown in @media */
-    position: fixed; top: 10px; right: 10px; width: 40px; height: 40px;
-    background-color: var(--accent-color-light); color: white; border-radius: 50%;
-    z-index: 15; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: background-color var(--transition-speed), right var(--transition-speed); /* Add right transition */
-    display: flex; align-items: center; justify-content: center; border: none;
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 10px;
+    right: 10px; /* Position on the right in RTL */
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color-light);
+    color: white;
+    border-radius: 50%;
+    z-index: 15; /* Above chat, below open sidebar */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color var(--transition-speed);
+     /* Use flex to center content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none; /* Remove default button border */
 }
-body.dark-mode #mobile-menu { background-color: var(--accent-color-dark); }
-/* State when sidebar is open */
-body.sidebar-open #mobile-menu {
-    right: calc(var(--sidebar-width) + 10px); /* Move left of sidebar */
+
+body.dark-mode #mobile-menu {
+    background-color: var(--accent-color-dark);
 }
 
 /* Mobile Settings Button (Button in input footer to open sidebar) */
-#mobile-settings { display: none; } /* Hidden by default, shown in @media */
-/* Close button inside sidebar header (mobile only) */
-#close-sidebar { display: none; }
+#mobile-settings {
+    display: none; /* Hidden by default, shown in media query */
+}
+/* New: Close button inside sidebar header (mobile only) */
+#close-sidebar {
+    /* Display handled by media query and JS */
+    /* Styling already defined above with icon-button */
+}
+
 
 /* Microphone Button Styles */
 #mic-button {
-    margin: 0; /* Reset margin */
+    /* Adjust margin for RTL */
+    margin-right: 0;
+    margin-left: var(--spacing-xs);
     transition: color var(--transition-speed), background-color var(--transition-speed);
-    flex-shrink: 0; align-self: flex-end; margin-bottom: 2px; /* Align with send */
+     flex-shrink: 0; /* Prevent shrinking */
 }
-#mic-button.recording { color: var(--mic-recording-light); animation: pulse 1.5s infinite; }
-body.dark-mode #mic-button.recording { color: var(--mic-recording-dark); }
-@keyframes pulse { /* Kept original */
-    0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); }
+
+#mic-button.recording {
+    color: var(--mic-recording-light);
+    animation: pulse 1.5s infinite;
+}
+
+body.dark-mode #mic-button.recording {
+    color: var(--mic-recording-dark);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 /* Confirmation Modal */
 .modal {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center;
-    opacity: 0; transition: opacity var(--transition-speed) ease;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+     /* New: Add opacity transition */
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
 }
-.modal.show { display: flex; opacity: 1; }
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+}
+
 .modal-content {
-    background-color: var(--bg-color-light); padding: var(--spacing-lg);
-    border-radius: var(--border-radius); width: 90%; max-width: 400px;
+    background-color: var(--bg-color-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: background-color var(--transition-speed); text-align: right;
+    transition: background-color var(--transition-speed);
+     /* Ensure text alignment in modal */
+    text-align: right;
 }
-body.dark-mode .modal-content { background-color: var(--bg-color-dark); }
-.modal-content h3 { margin-bottom: var(--spacing-md); text-align: center; }
-.modal-buttons { display: flex; justify-content: flex-end; gap: var(--spacing-md); margin-top: var(--spacing-lg); }
-.modal-buttons button { padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius);
-    cursor: pointer; font-family: var(--font-family); transition: background-color 0.15s ease, opacity 0.15s ease; }
+
+body.dark-mode .modal-content {
+    background-color: var(--bg-color-dark);
+}
+
+.modal-content h3 {
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end; /* Buttons to the right in RTL */
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.modal-buttons button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: var(--font-family);
+     /* Optional: Add transition for hover/active */
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
 .modal-buttons button:not(.danger-button) {
-    background-color: var(--secondary-color-light); border: none; color: var(--text-color-light); }
+    background-color: var(--secondary-color-light);
+    border: none;
+    color: var(--text-color-light);
+    /* transition: background-color var(--transition-speed), color var(--transition-speed); */ /* Already in general button style */
+}
+
 body.dark-mode .modal-buttons button:not(.danger-button) {
-    background-color: var(--secondary-color-dark); color: var(--text-color-dark); }
-.modal-buttons button:not(.danger-button):hover { opacity: 0.9; }
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
+}
+/* Optional: Hover effect for non-danger button */
+.modal-buttons button:not(.danger-button):hover {
+    opacity: 0.9;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .app-container { flex-direction: column; }
-    #settings-sidebar {
-        position: fixed; top: 0; right: 0; bottom: 0; width: 80%; max-width: 320px;
-        transform: translateX(100%); z-index: 20; box-shadow: -2px 0 10px rgba(0,0,0,0.2);
-        border-left: none; /* Remove border on mobile */
-        border-right: 1px solid var(--sidebar-border-light); /* Add border on the visible side */
+    .app-container {
+        flex-direction: column;
     }
-    body.dark-mode #settings-sidebar { border-right-color: var(--sidebar-border-dark); }
-    #settings-sidebar.show { transform: translateX(0); }
 
-    #mobile-menu { display: flex; } /* Show mobile menu button */
-    #mobile-settings { display: block; } /* Show mobile settings button in footer */
-    .sidebar-footer #toggle-sidebar { display: none; } /* Hide desktop toggle */
-    #settings-sidebar .sidebar-header #close-sidebar { display: flex; } /* Show close button */
+    #settings-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 80%; /* Take 80% of the screen width */
+        max-width: 320px;
+        transform: translateX(100%); /* Start off-screen */
+        z-index: 20;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+    }
 
-    /* Message bubble adjustments */
-    .message-bubble { max-width: 90%; padding-bottom: var(--spacing-md); /* Reset padding */ }
-    .message-timestamp { display: none; } /* Hide timestamp */
-    .message-actions { bottom: var(--spacing-xs); /* Adjust position */ left: var(--spacing-sm); opacity: 1; /* Always visible */ }
-    .user-bubble .message-actions { right: var(--spacing-sm); left: auto; }
+    #settings-sidebar.show {
+        transform: translateX(0); /* Slide in */
+    }
 
-    /* Input area adjustments */
-    #input-area { padding: var(--spacing-sm); }
-    #input-container { padding: var(--spacing-xs); }
-    #message-input { padding: var(--spacing-sm); }
+    #mobile-menu {
+        display: flex; /* Show on mobile */
+         /* Adjust position so it's not covered by the sidebar when open */
+         /* Handled by JS adding a class or recalculating in resize listener */
+    }
+     /* New: Style for mobile menu button when sidebar is open */
+     #settings-sidebar.show + #sidebar-overlay + #chat-container #mobile-menu {
+         right: calc(var(--sidebar-width) + var(--spacing-md)); /* Move button outside sidebar */
+         transition: right var(--transition-speed) ease-in-out; /* Animate movement */
+     }
+
+
+    #mobile-settings {
+        display: block; /* Show on mobile */
+    }
+
+    .sidebar-footer #toggle-sidebar {
+        display: none; /* Hide on mobile */
+    }
+
+     /* New: Show close button in sidebar header on mobile */
+     #settings-sidebar .sidebar-header #close-sidebar {
+         display: flex;
+     }
+
+
+    /* Slightly smaller messages on mobile */
+    .message-bubble {
+        max-width: 90%;
+    }
+     /* New: Adjust position of actions/timestamp on mobile */
+     /* Since timestamp is hidden on mobile, actions can move up */
+     .message-actions {
+         bottom: var(--spacing-sm); /* Move up */
+         left: var(--spacing-sm); /* Adjust left margin */
+         right: auto; /* Ensure right is auto */
+          /* Optional: Make actions always visible on mobile? */
+         /* opacity: 1; */ /* Uncomment this line to make actions always visible on mobile */
+     }
+    .user-bubble .message-actions {
+         right: var(--spacing-sm); /* Adjust right margin */
+         left: auto; /* Ensure left is auto */
+     }
+     /* New: Hide timestamp on mobile */
+     .message-timestamp {
+         display: none;
+     }
+     /* New: Reduce bottom padding on bubble since timestamp is hidden */
+     .message-bubble {
+         padding-bottom: var(--spacing-md);
+     }
+
+
+    /* Adjust input area padding on mobile */
+    #input-area {
+        padding: var(--spacing-sm);
+    }
+    #input-container {
+         padding: var(--spacing-xs);
+    }
+    #message-input {
+         padding: var(--spacing-sm);
+    }
+     /* Adjust margins for buttons in input container */
+     #mic-button, #send-button {
+         margin-left: var(--spacing-xs); /* Keep small margin */
+     }
+
+    /* Adjust footer padding on mobile */
+    .input-footer {
+        padding: 0 var(--spacing-xs);
+    }
+
+    /* Adjust header/footer padding on mobile */
+    .chat-header, .chat-footer {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
 }
 
 /* Utilities */
-.hidden { display: none !important; }
-.fade-in { animation: fadeIn 0.3s; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } /* Spinner animation */
+.hidden {
+    display: none !important;
+}
 
-/* Print Styles */
+.fade-in {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Special Loading Effect for Chat Bubble (Keep original) */
+.loading-content {
+    display: inline-block;
+    min-width: 1em;
+    min-height: 1em;
+}
+
+/* Print Styles (Keep original) */
 @media print {
-    #settings-sidebar, #input-area, #mobile-menu, .chat-header, .chat-footer, .message-actions, #offline-indicator, #app-error-message, #sidebar-overlay, .message-timestamp, #regenerate-button { display: none !important; }
-    body, #chat-container, #messages { height: auto !important; overflow: visible !important; }
-    .message-bubble { break-inside: avoid; page-break-inside: avoid; box-shadow: none; border: 1px solid #ddd; padding-bottom: var(--spacing-md); }
-    #messages { gap: var(--spacing-sm); } /* Reduce gap for print */
-    #messages .message-bubble { margin-bottom: 0; }
+    #settings-sidebar, #input-area, #mobile-menu, .chat-header, .chat-footer, .message-actions, #offline-indicator, #app-error-message, #sidebar-overlay, .message-timestamp {
+        display: none !important;
+    }
+
+    body, #chat-container, #messages {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .message-bubble {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+         padding-bottom: var(--spacing-md); /* Ensure padding is suitable for print */
+    }
+     /* Remove gaps for print */
+     #messages {
+         gap: 0;
+     }
+     #messages .message-bubble {
+         margin-bottom: var(--spacing-md);
+     }
 }
 
-/* Copy code button styling */
+/* New: Global error message positioning helper */
+/* This is a placeholder class. The actual positioning is done by JS */
+.app-error-message {
+     /* Initial styles defined above */
+}
+.app-error-message.show {
+    /* Show styles defined above */
+}
+
+/* New: Added styles for code block copy button if you add them in HTML/JS */
+/* This is outside the main app styling, specific to code blocks within descriptions */
 button.copy-code-button {
-    background-color: #f1f1f1; color: #333; border: 1px solid #ccc; border-radius: 4px;
-    padding: 3px 8px; margin: 5px; cursor: pointer; font-size: 0.85em;
-    display: inline-flex; align-items: center; gap: 4px;
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     transition: background-color 0.2s ease, color 0.2s ease;
-    position: absolute; top: 5px; left: 5px; z-index: 1; /* Position top-left */
+    /* Add positioning if needed, e.g., float or absolute */
+    /* float: left; margin-left: 10px; */
+    /* position: absolute; top: 5px; right: 5px; z-index: 1; */ /* Position on the right */
 }
-button.copy-code-button:hover { background-color: #e2e2e2; }
-button.copy-code-button i { font-size: 0.9em; }
-button.copy-code-button.copied { background-color: #28a745; color: white; border-color: #28a745; }
-button.copy-code-button.copied i { color: white; }
-button.copy-code-button.error { background-color: #dc3545; color: white; border-color: #dc3545; }
-button.copy-code-button.error i { color: white; }
-pre { position: relative; padding-top: 35px; /* Space for button */ } /* Ensure pre has space */
+button.copy-code-button:hover {
+    background-color: #e2e2e2;
+}
+button.copy-code-button i {
+    color: #333;
+}
+button.copy-code-button.copied {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+button.copy-code-button.copied i {
+     color: white;
+}
+button.copy-code-button.error {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+button.copy-code-button.error i {
+     color: white;
+}
 
-/* Added from original file which might be needed */
-.loading-content { display: inline-block; min-width: 1em; min-height: 1em; }
+pre {
+    /* Add padding-top if using absolute positioned button inside */
+    position: relative;
+    /* padding-top: 30px; */
+    clear: both; /* Ensure pre starts below floated button */
+}
