@@ -18,7 +18,7 @@
         <div id="settings-sidebar">
              <div class="sidebar-header">
                  <h2>ياسمين GPT</h2>
-                 <!-- Close button for mobile -->
+                 <!-- Close button for mobile, hidden on desktop -->
                  <button id="close-sidebar" class="icon-button close-button" title="إغلاق الشريط الجانبي">
                      <i class="fas fa-times"></i>
                  </button>
@@ -30,26 +30,30 @@
                 <i class="fas fa-plus"></i> محادثة جديدة
             </button>
 
+            <!-- Conversations List Section -->
             <div class="sidebar-section conversations-section">
                 <h3>المحادثات</h3>
                 <div id="conversations-list" class="conversations-container">
-                    <!-- Conversations will be listed here dynamically -->
+                    <!-- Conversations will be listed here dynamically by app.js -->
                     <div class="empty-state">لا توجد محادثات سابقة</div>
                 </div>
             </div>
 
+            <!-- Features Section -->
             <div class="sidebar-section features-section">
                 <h3>الميزات</h3>
 
-                <!-- Translation Feature -->
+                <!-- Translation Feature Example -->
                 <div class="feature-item">
                     <a href="/translation" class="feature-link">
                         <i class="fas fa-language"></i> خدمة الترجمة
                     </a>
                 </div>
-                 <!-- Add other features here -->
+                 <!-- Add other feature items here as needed -->
+                 <!-- Example: <div class="feature-item"><a href="/speech" class="feature-link"><i class="fas fa-microphone"></i> خدمة الصوت</a></div> -->
             </div>
 
+            <!-- Settings Section -->
             <div class="sidebar-section settings-section">
                 <h3>الإعدادات</h3>
 
@@ -73,7 +77,7 @@
                 <!-- Max Tokens -->
                 <div class="setting-item">
                     <label for="max-tokens-input">الحد الأقصى للرموز:</label>
-                    <input type="number" id="max-tokens-input" value="512" min="50" max="4000" step="10"> <!-- Added step -->
+                    <input type="number" id="max-tokens-input" value="512" min="50" max="4000" step="10">
                 </div>
 
                 <!-- Dark Mode Toggle -->
@@ -93,18 +97,20 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
+                 <!-- Add other settings items here -->
             </div>
 
+            <!-- Sidebar Footer -->
             <div class="sidebar-footer">
                 <span>تم التطوير بواسطة ياسمين</span>
-                <!-- Toggle sidebar button (Desktop Only) -->
+                <!-- Toggle sidebar button (Desktop Only), hidden on mobile -->
                 <button id="toggle-sidebar" class="icon-button" title="إغلاق الشريط الجانبي">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
-        </div>
+        </div> <!-- End #settings-sidebar -->
 
-        <!-- Overlay for mobile sidebar -->
+        <!-- Overlay for mobile sidebar, hidden on desktop -->
         <div id="sidebar-overlay"></div>
 
         <!-- Main Chat Area -->
@@ -113,61 +119,76 @@
             <div class="chat-header">
                 <h2>{{ app_title }} <span class="version">v2.0</span></h2>
                 <p>شركة dzteck | بواسطة rahmani</p>
-            </div>
+            </div> <!-- End .chat-header -->
 
             <!-- Offline Indicator -->
             <div id="offline-indicator">
                 <i class="fas fa-exclamation-triangle"></i>
                 أنت غير متصل بالإنترنت
-            </div>
+            </div> <!-- End #offline-indicator -->
 
             <!-- Messages Container -->
             <div id="messages">
-                <!-- Welcome message (initial load or new conversation) -->
-                <div class="message-bubble ai-bubble initial-welcome"> <!-- Added initial-welcome class -->
+                <!-- Initial Welcome Message (added by app.js on load if no conversation) -->
+                <!-- Example structure of a message bubble: -->
+                <!--
+                <div class="message-bubble ai-bubble initial-welcome" data-message-id="[optional-db-id]">
                     <p>السلام عليكم! أنا ياسمين، مساعدتك الرقمية بالعربية. كيف يمكنني مساعدتك اليوم؟</p>
-                    <div class="message-timestamp"></div> <!-- Timestamp will be added by JS -->
+                    <div class="message-timestamp">10:30 ص</div>
                     <div class="message-actions">
                         <button class="copy-btn" title="نسخ الرد"><i class="fas fa-copy"></i></button>
-                        <!-- Speak button added by JS if TTS is supported -->
-                        <!-- Vote buttons added by JS -->
+                         <button class="speak-btn" title="استماع إلى الرد"><i class="fas fa-volume-up"></i></button>
+                        <div class="vote-buttons">
+                            <button class="like-btn" title="أعجبني" data-vote-type="like"><i class="fas fa-thumbs-up"></i></button>
+                            <button class="dislike-btn" title="لم يعجبني" data-vote-type="dislike"><i class="fas fa-thumbs-down"></i></button>
+                        </div>
                     </div>
                 </div>
+                <div class="message-bubble user-bubble" data-message-id="[optional-db-id]">
+                    <p>مرحبا ياسمين، كيف حالك؟</p>
+                    <div class="message-timestamp">10:31 ص</div>
+                     <div class="message-actions">
+                         <button class="copy-btn" title="نسخ الرسالة"><i class="fas fa-copy"></i></button>
+                          // Vote buttons typically only for AI messages
+                    </div>
+                </div>
+                -->
 
-                <!-- Messages will be added here dynamically by JS -->
-            </div>
+            </div> <!-- End #messages -->
 
-            <!-- Regenerate Button (Placed dynamically by JS before #input-area) -->
+            <!-- Regenerate Button (Positioned by app.js) -->
+             <!-- This button is created and moved by JS -->
 
             <!-- Input Area -->
             <div id="input-area">
                 <div id="input-container">
                     <textarea id="message-input" placeholder="اكتب رسالتك هنا... (Enter للإرسال، Shift+Enter لإضافة سطر)"></textarea>
-                    <!-- Microphone Button -->
+                    <!-- Microphone Button (shown if STT supported) -->
                     <button id="mic-button" class="icon-button" title="إدخال صوتي">
                         <i class="fas fa-microphone"></i>
                     </button>
+                    <!-- Send Button -->
                     <button id="send-button" title="إرسال">
                         <i class="fas fa-paper-plane"></i>
                     </button>
-                </div>
+                </div> <!-- End #input-container -->
                 <div class="input-footer">
                     <span class="typing-hint">Enter للإرسال • Shift+Enter لسطر جديد</span>
-                    <!-- Mobile Settings Button (opens sidebar) -->
+                    <!-- Mobile Settings Button (opens sidebar), hidden on desktop -->
                     <button id="mobile-settings" class="icon-button" title="الإعدادات">
                         <i class="fas fa-cog"></i>
                     </button>
-                </div>
-            </div>
+                </div> <!-- End .input-footer -->
+            </div> <!-- End #input-area -->
 
-            <!-- Global App Error Message -->
+            <!-- Global App Error Message Container -->
              <div id="app-error-message" class="app-error-message"></div>
 
 
             <!-- App Footer -->
             <div class="chat-footer">
                 <p>التطوير بواسطة شركة dzteck للبرمجيات | الإصدار v2.0</p>
-            </div>
+            </div> <!-- End .chat-footer -->
 
         </div> <!-- End #chat-container -->
     </div> <!-- End .app-container -->
@@ -187,8 +208,9 @@
                 <button id="confirm-ok" class="danger-button">تأكيد</button>
             </div>
         </div>
-    </div>
+    </div> <!-- End #confirm-modal -->
 
+    <!-- Script Tag -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 </body>
