@@ -79,6 +79,10 @@ body.dark-mode #new-conversation {
     background-color: var(--accent-color-dark);
 }
 
+body.dark-mode #new-conversation:hover {
+    background-color: var(--accent-color-light);
+}
+
 .conversation-item {
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
@@ -202,6 +206,7 @@ body.dark-mode .assistant-message {
     display: flex;
     align-items: flex-end;
     gap: var(--spacing-sm);
+    position: relative;
 }
 
 #message-input {
@@ -244,6 +249,10 @@ body.dark-mode #send-button, body.dark-mode #record-button {
     background-color: var(--accent-color-dark);
 }
 
+body.dark-mode #send-button:hover, body.dark-mode #record-button:hover {
+    background-color: var(--accent-color-light);
+}
+
 #settings-button {
     position: fixed;
     top: var(--spacing-md);
@@ -260,6 +269,10 @@ body.dark-mode #send-button, body.dark-mode #record-button {
 
 body.dark-mode #settings-button {
     background-color: var(--accent-color-dark);
+}
+
+body.dark-mode #settings-button:hover {
+    background-color: var(--accent-color-light);
 }
 
 #settings-sidebar {
