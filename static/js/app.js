@@ -6,6 +6,7 @@ const modelSelect = document.getElementById('model-select');
 const settingsButton = document.getElementById('settings-button');
 const settingsSidebar = document.getElementById('settings-sidebar');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
+const recordButton = document.getElementById('record-button');
 const inputArea = document.getElementById('input-area');
 const offlineIndicator = document.createElement('div');
 let currentConversationId = null;
@@ -36,6 +37,8 @@ function initializeSpeechRecognition() {
             stopRecording();
             alert('فشل التعرف على الصوت، حاول مرة أخرى.');
         };
+    } else {
+        recordButton.style.display = 'none';
     }
 }
 
@@ -50,6 +53,7 @@ function setupEventListeners() {
     messageInput.addEventListener('input', adjustInputHeight);
     settingsButton.addEventListener('click', toggleSettings);
     darkModeToggle.addEventListener('change', toggleDarkMode);
+    recordButton.addEventListener('click', () => isRecording ? stopRecording() : startRecording());
     window.addEventListener('online', () => offlineIndicator.style.display = 'none');
     window.addEventListener('offline', () => {
         offlineIndicator.style.display = 'block';
@@ -145,7 +149,7 @@ async function sendMessage() {
             await loadConversations();
             await loadConversation(currentConversationId);
         }
-        if (data.suggestions) {
+        if (data.suggestions && data.suggestions.length > 0) {
             displaySuggestions(data.suggestions);
         }
         chatArea.scrollTop = chatArea.scrollHeight;
@@ -237,6 +241,7 @@ async function loadAnalytics() {
     try {
         const response = await fetch('/api/conversations/analytics');
         const data = await response.json();
+        if (data.error) throw new Error(data.error);
         const content = `
             <p>إجمالي المحادثات: ${data.total_conversations}</p>
             <p>إجمالي الرسائل: ${data.total_messages}</p>
@@ -276,6 +281,7 @@ function startRecording() {
         recognition.start();
         isRecording = true;
         sendButton.innerHTML = '<i class="fas fa-stop"></i>';
+        recordButton.innerHTML = '<i class="fas fa-microphone-slash"></i>';
     }
 }
 
@@ -284,6 +290,7 @@ function stopRecording() {
         recognition.stop();
         isRecording = false;
         sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        recordButton.innerHTML = '<i class="fas fa-microphone"></i>';
     }
 }
 
