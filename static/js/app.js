@@ -1,1119 +1,423 @@
-// Ensure the DOM is fully loaded before running the script
-document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Elements ---
-    const settingsSidebar = document.getElementById('settings-sidebar');
-    const toggleSidebarButton = document.getElementById('toggle-sidebar');
-    const mobileMenuButton = document.getElementById('mobile-menu');
-    const mobileSettingsButton = document.getElementById('mobile-settings');
-    const newConversationButton = document.getElementById('new-conversation');
-    const conversationsList = document.getElementById('conversations-list');
-    const messagesContainer = document.getElementById('messages');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const modelSelect = document.getElementById('model-select');
-    const temperatureSlider = document.getElementById('temperature-slider');
-    const temperatureValueSpan = document.getElementById('temperature-value');
-    const maxTokensInput = document.getElementById('max-tokens-input');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const offlineIndicator = document.getElementById('offline-indicator');
-    const confirmModal = document.getElementById('confirm-modal');
-    const confirmMessage = document.getElementById('confirm-message');
-    const confirmOkButton = document.getElementById('confirm-ok');
-    const confirmCancelButton = document.getElementById('confirm-cancel');
-    const ttsToggle = document.getElementById('tts-toggle');
-    const micButton = document.getElementById('mic-button');
+import os
+import logging
+import requests
+import json
+import uuid
+from datetime import datetime, timezone # استخدام timezone aware datetime
 
-    // --- State Variables ---
-    let currentConversationId = null;
-    let messages = []; // Stores current conversation messages {role: 'user'/'assistant', content: '...'}
-    let isTyping = false; // To prevent multiple requests or show typing indicator
-    let confirmationCallback = null; // Function to call after modal confirmation
-    const WELCOME_MESSAGE_CONTENT = "السلام عليكم! أنا ياسمين، مساعدتك الرقمية بالعربية. كيف يمكنني مساعدتك اليوم؟";
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, Text, DateTime, ForeignKey, select, delete, update, desc, func
+from sqlalchemy.dialects.postgresql import UUID # لاستخدام نوع UUID الأصلي في PostgreSQL
+from sqlalchemy.exc import SQLAlchemyError
 
-    // --- New: Frontend Offline Message ---
-    const FRONTEND_OFFLINE_MESSAGE = "أعتذر، لا يوجد اتصال بالإنترنت حاليًا. لا يمكنني معالجة طلبك الآن.";
+# --- إعداد التسجيل ---
+# في Render، سيتم التقاط المخرجات إلى stdout/stderr وعرضها في السجلات
+log_level = os.environ.get('LOG_LEVEL', 'INFO').upper()
+logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-    // --- New: Predefined Responses (Canned Responses) ---
-    const PREDEFINED_RESPONSES = {
-        "من صنعك": "أنا نموذج لغوي كبير، تم تطويري بواسطة شركة ياسمين للتطوير والبحث في الذكاء الاصطناعي.",
-        "من انت": "أنا نموذج لغوي كبير، تم تطويري بواسطة شركة ياسمين للتطوير والبحث في الذكاء الاصطناعي.",
-        "مين عملك": "أنا نموذج لغوي كبير، تم تطويري بواسطة شركة ياسمين للتطوير والبحث في الذكاء الاصطناعي.",
-        "مين انت": "أنا نموذج لغوي كبير، تم تطويري بواسطة شركة ياسمين للتطوير والبحث في الذكاء الاصطناعي.",
-        "من بناك": "أنا نموذج لغوي كبير، تم تطويري بواسطة شركة ياسمين للتطوير والبحث في الذكاء الاصطناعي.",
-        // Add other specific phrases if needed
-    };
-     // Helper function to check for predefined responses
-     function checkPredefinedResponse(userMessage) {
-         // Basic cleaning: lowercase, remove common punctuation, trim
-         const cleanedMessage = userMessage.toLowerCase().replace(/[?؟!,.\s]+/g, ' ').trim();
-         // Check if the cleaned message *starts with* any of the keys
-         // Using startsWith allows matching "من صنعك يا ياسمين؟"
-         for (const key in PREDEFINED_RESPONSES) {
-              if (cleanedMessage.startsWith(key.toLowerCase() + ' ')) { // Check for word boundary
-                  return PREDEFINED_RESPONSES[key];
-              }
-               if (cleanedMessage === key.toLowerCase()) { // Exact match
-                  return PREDEFINED_RESPONSES[key];
-               }
-         }
-         return null; // No predefined response found
-     }
+# --- Base Class for SQLAlchemy models (أسلوب حديث) ---
+class Base(DeclarativeBase):
+    pass
 
+# --- تهيئة Flask و SQLAlchemy ---
+app = Flask(__name__)
 
-    // --- Speech Recognition (STT) ---
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    let isRecording = false;
+# --- تحميل الإعدادات الحساسة من متغيرات البيئة (ضروري لـ Render) ---
+app.secret_key = os.environ.get("SESSION_SECRET")
+if not app.secret_key:
+    logger.warning("SESSION_SECRET environment variable not set. Using a default insecure key for now.")
+    app.secret_key = "default-insecure-secret-key-for-render" # Use this only if loading fails
 
-    if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'ar-SA'; // Set language to Arabic (Saudi Arabia). Adjust as needed (e.g., 'ar-EG' for Egypt)
-        recognition.continuous = false; // Capture a single utterance
-        recognition.interimResults = true; // Get results while speaking
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    logger.error("FATAL: DATABASE_URL environment variable is not set.")
+    # Fallback to SQLite for local dev if needed, but error out in production
+    # default_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'local_chat.db')
+    # DATABASE_URL = f'sqlite:///{default_db_path}'
+    # logger.warning(f"Using default local SQLite database: {DATABASE_URL}")
+    raise ValueError("DATABASE_URL environment variable is required.") # Fail fast if not set
+else:
+    # Render might provide 'postgres://' instead of 'postgresql://'
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 
-        recognition.onstart = () => {
-            console.log('Speech recognition started');
-            isRecording = true;
-            micButton.classList.add('recording');
-            micButton.title = 'إيقاف التسجيل الصوتي';
-            // Optionally clear input or show indicator
-            // messageInput.value = ''; // Clear input on start? Or append? Let's append for now.
-            messageInput.placeholder = 'استمع... تحدث الآن...';
-        };
-
-        recognition.onresult = (event) => {
-            console.log('Speech recognition result:', event);
-            let interimTranscript = '';
-            let finalTranscript = '';
-
-            // Process all results
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
-            }
-
-            // Append final transcript to the input
-            if (finalTranscript) {
-                 // Append a space if input already has text and doesn't end with space/newline
-                 if (messageInput.value && !messageInput.value.match(/[\s\n]$/)) {
-                    messageInput.value += ' ';
-                 }
-                messageInput.value += finalTranscript;
-            } else {
-                 // Optionally show interim results
-                 // messageInput.placeholder = `...${interimTranscript}...`; // Indicate listening - might be distracting
-            }
-
-             // Keep input field focused and adjust height
-             messageInput.focus();
-             adjustInputHeight();
-        };
-
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            isRecording = false;
-            micButton.classList.remove('recording');
-            micButton.title = 'إدخال صوتي';
-             messageInput.placeholder = 'اكتب رسالتك هنا...'; // Reset placeholder
-             // Provide more specific feedback based on error type
-             let errorMessage = 'حدث خطأ في التعرف على الصوت.';
-             if (event.error === 'not-allowed') {
-                  errorMessage = 'تم رفض الوصول إلى الميكروفون. يرجى السماح للموقع بالوصول.';
-             } else if (event.error === 'no-speech') {
-                  errorMessage = 'لم يتم الكشف عن صوت. يرجى التحدث بوضوح.';
-             } else if (event.error === 'audio-capture') {
-                  errorMessage = 'فشل التقاط الصوت. تأكد من اتصال الميكروفون.';
-             } else if (event.error === 'language-not-supported') {
-                  errorMessage = 'اللغة العربية غير مدعومة في متصفحك لهذا الإدخال الصوتي.';
-             } else if (event.error === 'network') {
-                 errorMessage = 'مشكلة في الشبكة أثناء التعرف على الصوت.';
-             }
-
-
-             alert(`خطأ في التعرف على الصوت: ${errorMessage}`);
-
-        };
-
-        recognition.onend = () => {
-            console.log('Speech recognition ended');
-            isRecording = false;
-            micButton.classList.remove('recording');
-            micButton.title = 'إدخال صوتي';
-             messageInput.placeholder = 'اكتب رسالتك هنا...'; // Reset placeholder
-             // If input is not empty after recording, maybe send automatically? Or let user send?
-             // For now, let the user click send.
-        };
-
-         // Mic button click handler
-        if (micButton) { // Check if micButton exists
-             micButton.addEventListener('click', () => {
-               if (isRecording) {
-                   recognition.stop(); // Stop recording
-               } else {
-                   // Clear input before starting new voice input
-                   // Decide whether to clear or append. Clearing is simpler for single utterances.
-                   // messageInput.value = '';
-                   recognition.start(); // Start recording
-               }
-             });
-        }
-
-
-         // Hide mic button if STT is not supported
-    } else {
-        console.warn('Web Speech API (SpeechRecognition) not supported in this browser.');
-        if (micButton) micButton.style.display = 'none'; // Hide the microphone button
+# إعدادات اتصال قاعدة البيانات الموصى بها للبيئات السحابية
+if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgresql"):
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_recycle": 280,  # Less than 5 min (common timeout)
+        "pool_pre_ping": True, # Check connection before use
+        "pool_timeout": 10,   # Wait time for connection from pool
     }
-
-    // --- Speech Synthesis (TTS) ---
-    const SpeechSynthesis = window.speechSynthesis;
-    let availableVoices = [];
-    let speakingUtterance = null; // Keep track of the current utterance
-    
-    // Force initial loading of voices
-    if (SpeechSynthesis) {
-        SpeechSynthesis.cancel(); // Reset any previous state
-        
-        // Function to load available voices and prioritize Arabic voices
-        const loadVoices = () => {
-            availableVoices = SpeechSynthesis.getVoices();
-            
-            // تسجيل الأصوات المتوفرة في سجل الكونسول
-            console.log(`${availableVoices.length} voices loaded`);
-            
-            // تصفية الأصوات العربية المتوفرة
-            const arabicVoices = availableVoices.filter(voice => 
-                voice.lang === 'ar' || 
-                voice.lang.startsWith('ar-') ||
-                voice.lang.includes('ar') ||
-                voice.name.toLowerCase().includes('arab')
-            );
-            
-            if (arabicVoices.length > 0) {
-                console.log(`تم العثور على ${arabicVoices.length} صوت عربي:`, 
-                    arabicVoices.map(v => `${v.name} (${v.lang})`).join(', '));
-            } else {
-                console.warn('لم يتم العثور على أي صوت عربي في المتصفح');
-            }
-        };
-        
-        // Handle voice loading - browsers handle this differently
-        if (SpeechSynthesis.onvoiceschanged !== undefined) {
-            // Chrome and most browsers need this event
-            SpeechSynthesis.onvoiceschanged = loadVoices;
-        }
-        
-        // Initial loading attempt
-        loadVoices();
-        
-        // Double-check if voices are already available
-        if (availableVoices.length === 0) {
-            console.log('No voices immediately available. Waiting for voices to load...');
-            // Force a second attempt after a short delay
-            setTimeout(() => {
-                loadVoices();
-                if (availableVoices.length === 0) {
-                    console.warn('Still no voices available after delay. TTS may not work properly.');
-                }
-            }, 500);
-        }
-
-
-        // Function to speak a given text
-        const speakText = (text) => {
-            if (!SpeechSynthesis || !text) {
-                console.warn('Speech synthesis not available or text is empty.');
-                alert('خدمة التحدث غير متوفرة في هذا المتصفح');
-                return;
-            }
-
-            // Make sure we have the latest voices
-            if (availableVoices.length === 0) {
-                availableVoices = SpeechSynthesis.getVoices();
-            }
-
-            // Stop previous speech if any
-            if (SpeechSynthesis.speaking) {
-                SpeechSynthesis.cancel();
-            }
-
-            try {
-                // Create utterance and set its properties
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ar'; // Force Arabic language
-                utterance.rate = 0.9;  // Slightly slower for Arabic
-                utterance.pitch = 1.0; // Normal pitch
-                utterance.volume = 1.0; // Full volume
-                
-                // استخدام صوت عربي فقط
-                let selectedVoice = null;
-                
-                if (availableVoices.length > 0) {
-                    // البحث عن صوت باللهجة السعودية أولاً
-                    selectedVoice = availableVoices.find(v => v.lang === 'ar-SA');
-                    
-                    // البحث عن أي لهجة عربية
-                    if (!selectedVoice) {
-                        selectedVoice = availableVoices.find(v => 
-                            v.lang === 'ar' || v.lang.startsWith('ar-'));
-                    }
-                    
-                    // البحث عن أي صوت يدعم العربية
-                    if (!selectedVoice) {
-                        selectedVoice = availableVoices.find(v => 
-                            v.lang.includes('ar') || v.name.toLowerCase().includes('arab'));
-                    }
-                    
-                        // في حالة عدم وجود أي صوت عربي، استخدم أي صوت متوفر
-                    if (!selectedVoice) {
-                        // محاولة استخدام أي صوت مناسب آخر (حتى غير عربي)
-                        console.warn('لم يتم العثور على صوت عربي، سيتم استخدام الصوت الافتراضي');
-                        
-                        // اختيار أول صوت متوفر أفضل من عدم وجود صوت
-                        if (availableVoices.length > 0) {
-                            // استخدم الصوت الافتراضي للمتصفح
-                            selectedVoice = availableVoices.find(v => v.default) || availableVoices[0];
-                            console.log('استخدام الصوت الافتراضي:', selectedVoice.name);
-                        } else {
-                            console.warn('لا توجد أي أصوات متوفرة في المتصفح');
-                        }
-                    }
-                    
-                    // Apply the selected voice
-                    if (selectedVoice) {
-                        utterance.voice = selectedVoice;
-                        console.log('Using voice:', selectedVoice.name, `(${selectedVoice.lang})`);
-                    } else {
-                        console.warn('No voice found, using browser default');
-                    }
-                } else {
-                    console.warn('No voices available. Using browser default voice.');
-                }
-                
-                // Setup event handlers
-                utterance.onstart = () => {
-                    speakingUtterance = utterance;
-                    console.log('Speaking started');
-                };
-                
-                utterance.onend = () => {
-                    speakingUtterance = null;
-                    console.log('Speaking ended');
-                };
-                
-                utterance.onerror = (event) => {
-                    console.error('Speech synthesis error:', event.error);
-                    speakingUtterance = null;
-                };
-                
-                // إضافة رسالة للمستخدم لمعرفة حالة التحدث
-                const textToSpeak = text.substring(0, 500) + (text.length > 500 ? '...' : '');
-                console.log('Starting speech with text:', textToSpeak.substring(0, 50) + (textToSpeak.length > 50 ? '...' : ''));
-                
-                // بدء التحدث مع معالجة أخطاء محتملة
-                try {
-                    SpeechSynthesis.speak(utterance);
-                    
-                    // للتأكد من أن التحدث بدأ فعلاً
-                    setTimeout(() => {
-                        if (!SpeechSynthesis.speaking) {
-                            console.warn('التحدث لم يبدأ بشكل صحيح، قد لا يدعم المتصفح هذه الميزة');
-                        }
-                    }, 500);
-                } catch (err) {
-                    console.error('خطأ أثناء التحدث:', err);
-                }
-                
-                return true; // Successfully started speaking
-            } catch (err) {
-                console.error('Error in speech synthesis:', err);
-                alert('حدث خطأ في خدمة التحدث');
-                return false;
-            }
-        };
-
-         // Function to stop speaking
-         const stopSpeaking = () => {
-             if (SpeechSynthesis && SpeechSynthesis.speaking) {
-                 SpeechSynthesis.cancel();
-                 speakingUtterance = null;
-                 console.log('Speaking stopped.');
-             }
-         };
-
-
-        // Add click listener to messagesContainer to handle clicks on speak buttons
-        messagesContainer.addEventListener('click', (event) => {
-            // Check if the clicked element is a speak button or its icon
-            const speakButtonTarget = event.target.closest('.speak-btn');
-            
-            if (!speakButtonTarget) return; // Not a speak button
-            
-            // Visual feedback - change icon briefly
-            const icon = speakButtonTarget.querySelector('i');
-            const originalClass = icon.className;
-            
-            // Find the message bubble containing this button
-            const messageBubble = speakButtonTarget.closest('.message-bubble');
-            if (!messageBubble) return;
-            
-            // Find the text content within the bubble (p tag)
-            const textElement = messageBubble.querySelector('p');
-            if (!textElement || !textElement.textContent) return;
-            
-            // If already speaking, stop it
-            if (speakingUtterance && SpeechSynthesis.speaking) {
-                // Stop speech and reset icon
-                stopSpeaking();
-                icon.className = originalClass;
-            } else {
-                // Start speaking and set active icon
-                try {
-                    // Change icon to show activity
-                    icon.className = 'fas fa-volume-high';
-                    
-                    // Speak the content
-                    const success = speakText(textElement.textContent);
-                    
-                    if (success) {
-                        // Set an interval to check when speech ends and reset icon
-                        let iconCheckInterval = setInterval(() => {
-                            if (!SpeechSynthesis.speaking) {
-                                // Speech ended, reset icon and clear interval
-                                icon.className = originalClass;
-                                clearInterval(iconCheckInterval);
-                            }
-                        }, 500); // Check every half second
-                        
-                        // Also set a maximum timeout (30 seconds) to avoid leaking intervals
-                        setTimeout(() => {
-                            if (iconCheckInterval) {
-                                clearInterval(iconCheckInterval);
-                                icon.className = originalClass;
-                            }
-                        }, 30000);
-                    } else {
-                        // Speech didn't start, reset icon
-                        icon.className = originalClass;
-                    }
-                } catch (err) {
-                    console.error('Error handling speech button:', err);
-                    icon.className = originalClass; // Reset icon on error
-                }
-            }
-        });
-
-        // Load TTS preference from localStorage
-        const storedTtsPreference = localStorage.getItem('ttsEnabled');
-        if (storedTtsPreference === 'true') {
-            ttsToggle.checked = true;
-        }
-
-        // Handle TTS toggle changes
-        ttsToggle.addEventListener('change', () => {
-            localStorage.setItem('ttsEnabled', ttsToggle.checked);
-            // If turning off, stop any current speech
-            if (!ttsToggle.checked && SpeechSynthesis.speaking) {
-                stopSpeaking();
-            }
-        });
-
-    } else {
-        console.warn('Web Speech API (SpeechSynthesis) not supported in this browser.');
-        // Hide TTS toggle if not supported
-        if (ttsToggle) {
-            ttsToggle.parentElement.style.display = 'none';
-        }
-    }
-
-    // --- Initialize Models ---
-    // Common models available on OpenRouter
-    const availableModels = [
-        { value: 'mistralai/mistral-7b-instruct', label: 'Mistral 7B' },
-        { value: 'anthropic/claude-3-haiku', label: 'Claude 3 Haiku' },
-        { value: 'google/gemini-pro', label: 'Gemini Pro' },
-        { value: 'meta-llama/llama-3-8b-instruct', label: 'LLaMA 3 8B' },
-        { value: 'google/gemma-7b-it', label: 'Gemma 7B' },
-        { value: 'openai/gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-        { value: 'anthropic/claude-3-sonnet', label: 'Claude 3 Sonnet' }
-    ];
-
-    // Populate model dropdown
-    modelSelect.innerHTML = ''; // Clear any existing options
-    availableModels.forEach(model => {
-        const option = document.createElement('option');
-        option.value = model.value;
-        option.textContent = model.label;
-        modelSelect.appendChild(option);
-    });
-
-    // Load saved model preference from localStorage
-    const savedModel = localStorage.getItem('selectedModel');
-    if (savedModel && availableModels.some(model => model.value === savedModel)) {
-        modelSelect.value = savedModel;
-    }
-
-    // Save model selection to localStorage when changed
-    modelSelect.addEventListener('change', () => {
-        localStorage.setItem('selectedModel', modelSelect.value);
-    });
-
-    // --- Load and Display Conversations ---
-    async function loadConversations() {
-        try {
-            const response = await fetch('/api/conversations');
-            if (!response.ok) {
-                throw new Error('Failed to load conversations');
-            }
-            const conversations = await response.json();
-
-            // Clear the conversations list
-            while (conversationsList.firstChild) {
-                conversationsList.removeChild(conversationsList.firstChild);
-            }
-
-            if (conversations.length === 0) {
-                // No conversations to display
-                const emptyState = document.createElement('div');
-                emptyState.className = 'empty-state';
-                emptyState.textContent = 'لا توجد محادثات سابقة';
-                conversationsList.appendChild(emptyState);
-            } else {
-                // Display each conversation
-                conversations.forEach(conversation => {
-                    const conversationItem = document.createElement('div');
-                    conversationItem.className = 'conversation-item';
-                    if (conversation.id === currentConversationId) {
-                        conversationItem.classList.add('active');
-                    }
-
-                    // Format date
-                    const date = new Date(conversation.updated_at);
-                    const formattedDate = new Intl.DateTimeFormat('ar-SA', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    }).format(date);
-
-                    // Create a span for the title
-                    const titleSpan = document.createElement('span');
-                    titleSpan.textContent = conversation.title;
-                    titleSpan.title = `${conversation.title} - ${formattedDate}`;
-
-                    // Create action buttons container
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.className = 'conversation-actions';
-
-                    // Edit title button
-                    const editButton = document.createElement('button');
-                    editButton.className = 'icon-button';
-                    editButton.title = 'تعديل العنوان';
-                    editButton.innerHTML = '<i class="fas fa-edit"></i>';
-                    editButton.onclick = (e) => {
-                        e.stopPropagation(); // Prevent loading the conversation
-                        editConversationTitle(conversation.id, conversation.title);
-                    };
-
-                    // Delete button
-                    const deleteButton = document.createElement('button');
-                    deleteButton.className = 'icon-button';
-                    deleteButton.title = 'حذف المحادثة';
-                    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                    deleteButton.onclick = (e) => {
-                        e.stopPropagation(); // Prevent loading the conversation
-                        confirmDeleteConversation(conversation.id);
-                    };
-
-                    // Add buttons to actions div
-                    actionsDiv.appendChild(editButton);
-                    actionsDiv.appendChild(deleteButton);
-
-                    // Add title and actions to conversation item
-                    conversationItem.appendChild(titleSpan);
-                    conversationItem.appendChild(actionsDiv);
-
-                    // Set click handler for loading the conversation
-                    conversationItem.addEventListener('click', () => {
-                        loadConversation(conversation.id);
-                    });
-
-                    conversationsList.appendChild(conversationItem);
-                });
-            }
-        } catch (error) {
-            console.error('Error loading conversations:', error);
-            // Show error state
-            const errorState = document.createElement('div');
-            errorState.className = 'empty-state';
-            errorState.textContent = 'فشل تحميل المحادثات';
-            conversationsList.appendChild(errorState);
-        }
-    }
-
-    // --- Load a Single Conversation ---
-    async function loadConversation(conversationId) {
-        try {
-            const response = await fetch(`/api/conversations/${conversationId}`);
-            if (!response.ok) {
-                throw new Error('Failed to load conversation');
-            }
-            const conversation = await response.json();
-
-            // Update UI
-            clearMessages();
-            currentConversationId = conversationId;
-            messages = conversation.messages.map(msg => ({
-                role: msg.role,
-                content: msg.content
-            }));
-
-            // Add messages to UI
-            messages.forEach(msg => {
-                addMessageToUI(msg.role, msg.content);
-            });
-
-            // Update active state in conversation list
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                item.classList.remove('active');
-                const itemTitleSpan = item.querySelector('span');
-                if (itemTitleSpan && itemTitleSpan.textContent === conversation.title) {
-                    item.classList.add('active');
-                }
-            });
-
-            // Close sidebar on mobile after selecting a conversation
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
-
-            // Scroll to bottom
-            scrollToBottom();
-
-            // Show regenerate button if there are messages
-            if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
-                showRegenerateButton();
-            } else {
-                hideRegenerateButton();
-            }
-        } catch (error) {
-            console.error('Error loading conversation:', error);
-            alert('فشل تحميل المحادثة');
-        }
-    }
-
-    // --- Edit Conversation Title ---
-    function editConversationTitle(conversationId, currentTitle) {
-        const newTitle = prompt('أدخل العنوان الجديد للمحادثة:', currentTitle);
-        if (newTitle !== null && newTitle.trim() !== '') {
-            updateConversationTitle(conversationId, newTitle.trim());
-        }
-    }
-
-    // --- Update Conversation Title (API Call) ---
-    async function updateConversationTitle(conversationId, newTitle) {
-        try {
-            const response = await fetch(`/api/conversations/${conversationId}/title`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ title: newTitle }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update conversation title');
-            }
-
-            // Reload the conversations list
-            loadConversations();
-        } catch (error) {
-            console.error('Error updating conversation title:', error);
-            alert('فشل تحديث عنوان المحادثة');
-        }
-    }
-
-    // --- Confirm Delete Conversation ---
-    function confirmDeleteConversation(conversationId) {
-        confirmMessage.textContent = 'هل أنت متأكد من أنك تريد حذف هذه المحادثة؟';
-        showConfirmModal(() => {
-            deleteConversation(conversationId);
-        });
-    }
-
-    // --- Delete Conversation (API Call) ---
-    async function deleteConversation(conversationId) {
-        try {
-            const response = await fetch(`/api/conversations/${conversationId}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete conversation');
-            }
-
-            // If we deleted the current conversation, clear the UI
-            if (conversationId === currentConversationId) {
-                clearMessages();
-                currentConversationId = null;
-                messages = [];
-                hideRegenerateButton();
-            }
-
-            // Reload the conversations list
-            loadConversations();
-        } catch (error) {
-            console.error('Error deleting conversation:', error);
-            alert('فشل حذف المحادثة');
-        }
-    }
-
-    // --- Clear Messages UI ---
-    function clearMessages() {
-        messagesContainer.innerHTML = '';
-        hideRegenerateButton();
-
-        // Add welcome message
-        addMessageToUI('assistant', WELCOME_MESSAGE_CONTENT);
-    }
-
-    // --- Add Message to UI ---
-    function addMessageToUI(role, content) {
-        const messageBubble = document.createElement('div');
-        messageBubble.className = `message-bubble ${role === 'user' ? 'user-bubble' : 'ai-bubble'} fade-in`;
-
-        const messageContent = document.createElement('p');
-        messageContent.textContent = content;
-        messageBubble.appendChild(messageContent);
-
-        // For AI messages, add copy and TTS buttons
-        if (role === 'assistant') {
-            const messageActions = document.createElement('div');
-            messageActions.className = 'message-actions';
-
-            // Copy button
-            const copyButton = document.createElement('button');
-            copyButton.className = 'copy-btn';
-            copyButton.title = 'نسخ';
-            copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-            copyButton.addEventListener('click', () => {
-                navigator.clipboard.writeText(content)
-                    .then(() => {
-                        // Show success feedback
-                        copyButton.innerHTML = '<i class="fas fa-check"></i>';
-                        setTimeout(() => {
-                            copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy text:', err);
-                        copyButton.innerHTML = '<i class="fas fa-times"></i>';
-                        setTimeout(() => {
-                            copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-                        }, 2000);
-                    });
-            });
-
-            // Speak button
-            const speakButton = document.createElement('button');
-            speakButton.className = 'speak-btn';
-            speakButton.title = 'استماع';
-            speakButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-
-            messageActions.appendChild(copyButton);
-            messageActions.appendChild(speakButton);
-            messageBubble.appendChild(messageActions);
-
-            // If auto-TTS is enabled, speak this message automatically
-            if (ttsToggle && ttsToggle.checked && window.speechSynthesis && typeof speakText === 'function') {
-                setTimeout(() => {
-                    speakText(content);
-                }, 500); // Small delay to ensure UI is updated first
-            }
-        }
-
-        messagesContainer.appendChild(messageBubble);
-        scrollToBottom();
-    }
-
-    // --- Create Regenerate Button ---
-    function createRegenerateButton() {
-        // Check if the button already exists
-        let regenerateButton = document.getElementById('regenerate-button');
-        
-        if (!regenerateButton) {
-            regenerateButton = document.createElement('button');
-            regenerateButton.id = 'regenerate-button';
-            regenerateButton.innerHTML = '<i class="fas fa-redo"></i> إعادة توليد الرد';
-            regenerateButton.addEventListener('click', handleRegenerate);
-            
-            // Insert after messages container
-            messagesContainer.after(regenerateButton);
-        }
-        
-        return regenerateButton;
-    }
-
-    // --- Show Regenerate Button ---
-    function showRegenerateButton() {
-        const regenerateButton = createRegenerateButton();
-        regenerateButton.style.display = 'flex';
-    }
-
-    // --- Hide Regenerate Button ---
-    function hideRegenerateButton() {
-        const regenerateButton = document.getElementById('regenerate-button');
-        if (regenerateButton) {
-            regenerateButton.style.display = 'none';
-        }
-    }
-
-    // --- Handle Regenerate Button Click ---
-    async function handleRegenerate() {
-        if (!currentConversationId || isTyping) {
-            return;
-        }
-
-        isTyping = true;
-        
-        try {
-            // Remove the last AI message from UI
-            if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
-                const lastMessage = messagesContainer.lastChild;
-                if (lastMessage) {
-                    messagesContainer.removeChild(lastMessage);
-                }
-                
-                // Also remove from our messages array
-                messages.pop();
-            }
-
-            // Add typing indicator
-            addTypingIndicator();
-
-            // Prepare API call parameters
-            const requestBody = {
-                conversation_id: currentConversationId,
-                model: modelSelect.value,
-                temperature: parseFloat(temperatureSlider.value),
-                max_tokens: parseInt(maxTokensInput.value, 10)
-            };
-
-            // Make the API call
-            const response = await fetch('/api/regenerate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            });
-
-            // Remove typing indicator
-            removeTypingIndicator();
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'فشل إعادة توليد الرد');
-            }
-
-            const data = await response.json();
-            
-            // Add the new AI message to UI and messages array
-            addMessageToUI('assistant', data.content);
-            messages.push({ role: 'assistant', content: data.content });
-            
-            // Show regenerate button
-            showRegenerateButton();
-            
-        } catch (error) {
-            console.error('Error regenerating response:', error);
-            
-            // Show error in UI
-            addMessageToUI('assistant', `خطأ: ${error.message || 'فشل إعادة توليد الرد'}`);
-            
-        } finally {
-            isTyping = false;
-        }
-    }
-
-    // --- Add Typing Indicator ---
-    function addTypingIndicator() {
-        const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'message-bubble ai-bubble typing-indicator-bubble';
-        typingIndicator.id = 'typing-indicator';
-        
-        const indicator = document.createElement('div');
-        indicator.className = 'typing-indicator';
-        
-        for (let i = 0; i < 3; i++) {
-            const dot = document.createElement('span');
-            dot.className = 'typing-dot';
-            indicator.appendChild(dot);
-        }
-        
-        typingIndicator.appendChild(indicator);
-        messagesContainer.appendChild(typingIndicator);
-        scrollToBottom();
-    }
-
-    // --- Remove Typing Indicator ---
-    function removeTypingIndicator() {
-        const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) {
-            typingIndicator.remove();
-        }
-    }
-
-    // --- Send Message ---
-    async function sendMessage() {
-        const userMessage = messageInput.value.trim();
-        if (!userMessage || isTyping) {
-            return;
-        }
-
-        // Check network status first
-        if (!navigator.onLine) {
-            console.log("Offline mode detected. Using frontend offline message");
-            // Handle the offline case in the UI directly
-            addMessageToUI('user', userMessage);
-            messages.push({ role: 'user', content: userMessage });
-            
-            // Add offline response
-            addMessageToUI('assistant', FRONTEND_OFFLINE_MESSAGE);
-            messages.push({ role: 'assistant', content: FRONTEND_OFFLINE_MESSAGE });
-            
-            // Clear input field
-            messageInput.value = '';
-            adjustInputHeight();
-            return;
-        }
-
-        // Preliminary check for predefined responses
-        const predefinedResponse = checkPredefinedResponse(userMessage);
-        if (predefinedResponse) {
-            console.log("Using predefined response");
-            
-            // Show user message
-            addMessageToUI('user', userMessage);
-            messages.push({ role: 'user', content: userMessage });
-            
-            // Show predefined response
-            addMessageToUI('assistant', predefinedResponse);
-            messages.push({ role: 'assistant', content: predefinedResponse });
-            
-            // If this is a new conversation, we need to create it
-            if (!currentConversationId) {
-                // We'll create the conversation with the backend on next non-predefined message
-                // This saves API calls for quick predefined responses
-            } else {
-                // For existing conversations, we should add these messages to the server
-                // This is a nice-to-have but not vital, as the conversation exists already
-                // Could implement: sendMessagesToServer(currentConversationId, userMessage, predefinedResponse);
-            }
-            
-            // Clear input field and adjust
-            messageInput.value = '';
-            adjustInputHeight();
-            
-            // Show regenerate button
-            showRegenerateButton();
-            
-            return;
-        }
-
-        // Proceed with normal API call
-        isTyping = true;
-        
-        // Add user message to UI and clear input
-        addMessageToUI('user', userMessage);
-        messageInput.value = '';
-        adjustInputHeight();
-        
-        // Add typing indicator
-        addTypingIndicator();
-        
-        // Update messages array
-        messages.push({ role: 'user', content: userMessage });
-        
-        try {
-            // Prepare API call
-            const requestBody = {
-                history: messages,
-                conversation_id: currentConversationId,
-                model: modelSelect.value,
-                temperature: parseFloat(temperatureSlider.value),
-                max_tokens: parseInt(maxTokensInput.value, 10)
-            };
-            
-            // Make API call
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            });
-            
-            // Remove typing indicator
-            removeTypingIndicator();
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'فشل إرسال الرسالة');
-            }
-            
-            const data = await response.json();
-            
-            // Update conversation ID for new conversations
-            if (!currentConversationId && data.id) {
-                currentConversationId = data.id;
-                // Refresh conversation list
-                loadConversations();
-            }
-            
-            // Add AI response to UI and messages array
-            addMessageToUI('assistant', data.content);
-            messages.push({ role: 'assistant', content: data.content });
-            
-            // Show regenerate button
-            showRegenerateButton();
-            
-        } catch (error) {
-            console.error('Error sending message:', error);
-            
-            // Remove typing indicator
-            removeTypingIndicator();
-            
-            // Show error in UI
-            addMessageToUI('assistant', `خطأ: ${error.message || 'فشل إرسال الرسالة'}`);
-            
-        } finally {
-            isTyping = false;
-        }
-    }
-
-    // --- Utility Functions ---
-    function scrollToBottom() {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    function adjustInputHeight() {
-        messageInput.style.height = 'auto';
-        const newHeight = Math.min(messageInput.scrollHeight, 200); // Max height 200px
-        messageInput.style.height = `${newHeight}px`;
-    }
-
-    function toggleSidebar() {
-        settingsSidebar.classList.toggle('show');
-    }
-
-    function showConfirmModal(callback) {
-        confirmationCallback = callback;
-        confirmModal.classList.add('show');
-    }
-
-    function hideConfirmModal() {
-        confirmModal.classList.remove('show');
-        confirmationCallback = null;
-    }
-
-    // --- Event Listeners ---
-    // Send button click
-    sendButton.addEventListener('click', sendMessage);
-
-    // Message input key press (Enter to send, Shift+Enter for new line)
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-        // Allow Shift+Enter to add a new line
-    });
-
-    // Auto-adjust input height as user types
-    messageInput.addEventListener('input', adjustInputHeight);
-
-    // New conversation button
-    newConversationButton.addEventListener('click', () => {
-        clearMessages();
-        currentConversationId = null;
-        messages = [{ role: 'assistant', content: WELCOME_MESSAGE_CONTENT }]; // Keep welcome message
-        hideRegenerateButton();
-        // Close sidebar on mobile
-        if (window.innerWidth <= 768) {
-            toggleSidebar();
-        }
-    });
-
-    // Temperature slider change
-    temperatureSlider.addEventListener('input', () => {
-        temperatureValueSpan.textContent = temperatureSlider.value;
-        localStorage.setItem('temperature', temperatureSlider.value);
-    });
-
-    // Max tokens input change
-    maxTokensInput.addEventListener('change', () => {
-        localStorage.setItem('maxTokens', maxTokensInput.value);
-    });
-
-    // Dark mode toggle
-    darkModeToggle.addEventListener('change', () => {
-        document.body.classList.toggle('dark-mode', darkModeToggle.checked);
-        localStorage.setItem('darkModeEnabled', darkModeToggle.checked);
-    });
-
-    // Toggle sidebar button
-    toggleSidebarButton.addEventListener('click', toggleSidebar);
-    mobileMenuButton.addEventListener('click', toggleSidebar);
-    mobileSettingsButton.addEventListener('click', toggleSidebar);
-
-    // Confirm modal buttons
-    confirmOkButton.addEventListener('click', () => {
-        if (confirmationCallback) {
-            confirmationCallback();
-        }
-        hideConfirmModal();
-    });
-
-    confirmCancelButton.addEventListener('click', hideConfirmModal);
-
-    // Network status listeners
-    window.addEventListener('online', function() {
-        offlineIndicator.classList.remove('visible');
-    });
-
-    window.addEventListener('offline', function() {
-        offlineIndicator.classList.add('visible');
-    });
-
-    // --- Initialization ---
-    // Load saved settings from localStorage
-    const savedTemperature = localStorage.getItem('temperature');
-    if (savedTemperature) {
-        temperatureSlider.value = savedTemperature;
-        temperatureValueSpan.textContent = savedTemperature;
-    }
-
-    const savedMaxTokens = localStorage.getItem('maxTokens');
-    if (savedMaxTokens) {
-        maxTokensInput.value = savedMaxTokens;
-    }
-
-    const savedDarkMode = localStorage.getItem('darkModeEnabled');
-    if (savedDarkMode === 'true') {
-        darkModeToggle.checked = true;
-        document.body.classList.add('dark-mode');
-    }
-
-    // Check initial network status
-    if (!navigator.onLine) {
-        offlineIndicator.classList.add('visible');
-    }
-
-    // Initial UI setup
-    clearMessages(); // This adds the welcome message
-    loadConversations();
-    messageInput.focus();
-});
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# تهيئة SQLAlchemy مع التطبيق ونموذج Base
+db = SQLAlchemy(model_class=Base)
+db.init_app(app)
+
+# --- تحميل مفاتيح API ---
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+if not OPENROUTER_API_KEY: logger.warning("OPENROUTER_API_KEY not set. OpenRouter disabled.")
+if not GEMINI_API_KEY: logger.warning("GEMINI_API_KEY not set. Gemini backup disabled.")
+
+
+# إعدادات أخرى للتطبيق
+APP_URL = os.environ.get("APP_URL") # Important for HTTP-Referer check by OpenRouter
+if not APP_URL:
+    logger.warning("APP_URL environment variable is not set. Using a default which might cause issues.")
+    APP_URL = "http://localhost:5001" # Default for local dev, may not work correctly on Render
+
+# --- Changed App Title ---
+APP_TITLE = "dzteck Chat"
+
+# --- تعريف نماذج قاعدة البيانات (مدمجة هنا) ---
+# ... (Database models: Conversation, Message remain the same as original) ...
+class Conversation(Base):
+    __tablename__ = "conversations"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    messages: Mapped[list["Message"]] = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at", lazy="selectin")
+    def add_message(self, role: str, content: str): # Simplified add_message
+        new_message = Message(conversation_id=self.id, role=role, content=content)
+        db.session.add(new_message)
+        return new_message
+    def to_dict(self): return {"id": str(self.id), "title": self.title, "created_at": self.created_at.isoformat(), "updated_at": self.updated_at.isoformat(), "messages": [m.to_dict() for m in self.messages]}
+    def __repr__(self): return f"<Conversation(id={self.id}, title='{self.title}')>"
+
+class Message(Base):
+    __tablename__ = "messages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("conversations.id"), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String(20), nullable=False) # 'user' or 'assistant'
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="messages")
+    def to_dict(self): return {"id": self.id, "conversation_id": str(self.conversation_id), "role": self.role, "content": self.content, "created_at": self.created_at.isoformat()}
+    def __repr__(self): return f"<Message(id={self.id}, role='{self.role}', conv_id={self.conversation_id})>"
+
+
+# --- الردود الاحتياطية (للاستخدام عند فشل كل الـ APIs) ---
+# Updated offline responses to use "dzteck"
+offline_responses = {
+    "السلام عليكم": "وعليكم السلام! أنا مساعد dzteck الرقمي. للأسف، لا يوجد اتصال بالإنترنت حاليًا.",
+    "كيف حالك": "أنا بخير شكراً لك. لكن لا يمكنني الوصول للنماذج الذكية الآن بسبب انقطاع الإنترنت.",
+    "مرحبا": "أهلاً بك! أنا مساعد dzteck الرقمي. أعتذر، خدمة الإنترنت غير متوفرة حاليًا.",
+    "شكرا": "على الرحب والسعة! أتمنى أن يعود الاتصال قريباً.",
+    "مع السلامة": "إلى اللقاء! آمل أن أتمكن من مساعدتك بشكل أفضل عند عودة الإنترنت."
+}
+default_offline_response = "أعتذر، لا يمكنني معالجة طلبك الآن. يبدو أن هناك مشكلة في الاتصال بالإنترنت أو بخدمات الذكاء الاصطناعي."
+
+# --- دالة استدعاء Gemini API (النموذج الاحتياطي) ---
+# ... (call_gemini_api function remains the same as original) ...
+def call_gemini_api(messages_list, temperature, max_tokens=512):
+    """Call the Gemini API as a backup"""
+    if not GEMINI_API_KEY: return None, "مفتاح Gemini API غير متوفر"
+    try:
+        gemini_contents = [{"role": ("user" if msg["role"] == "user" else "model"), "parts": [{"text": msg["content"]}]} for msg in messages_list]
+        if gemini_contents and gemini_contents[-1]['role'] != 'user': logger.warning("Gemini API call adjusted: Last message was not from user.")
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={GEMINI_API_KEY}"
+        logger.debug(f"Calling Gemini API ({gemini_url.split('?')[0]}) with {len(gemini_contents)} parts...")
+        response = requests.post(url=gemini_url, headers={'Content-Type': 'application/json'}, json={"contents": gemini_contents, "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature}}, timeout=35)
+        response.raise_for_status()
+        response_data = response.json()
+        if 'candidates' not in response_data or not response_data['candidates']:
+            block_reason = response_data.get('promptFeedback', {}).get('blockReason', 'Unknown'); logger.error(f"Gemini response blocked/missing: {block_reason}"); return None, f"الرد محظور: {block_reason}"
+        text_parts = [part['text'] for part in response_data['candidates'][0]['content']['parts'] if 'text' in part]
+        if text_parts: return "".join(text_parts).strip(), None
+        else: logger.warning(f"No text in Gemini response: {response_data}"); return None, "لم يتم العثور على نص في استجابة Gemini"
+    except requests.exceptions.Timeout: logger.error("Gemini timeout."); return None, "مهلة Gemini"
+    except requests.exceptions.HTTPError as e:
+        try: error_details = e.response.json().get("error", {}).get("message", e.response.text)
+        except json.JSONDecodeError: error_details = e.response.text[:200]
+        logger.error(f"Gemini HTTP error ({e.response.status_code}): {error_details}"); return None, f"خطأ HTTP Gemini: {error_details}"
+    except requests.exceptions.RequestException as e: logger.error(f"Gemini connection error: {e}"); return None, f"خطأ اتصال Gemini: {e}"
+    except Exception as e: logger.error(f"Gemini processing error: {e}", exc_info=True); return None, f"خطأ معالجة Gemini: {e}"
+
+# --- مسارات Flask (Routes) ---
+
+@app.route('/')
+def index():
+    """Route for the main chat page."""
+    logger.info(f"Serving main page (index.html) requested by {request.remote_addr}")
+    # Pass the updated application title to the template
+    return render_template('index.html', app_title=APP_TITLE)
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """API route for handling chat messages."""
+    # ... (Logic remains the same as original, but APP_TITLE is now 'dzteck Chat') ...
+    # Key parts:
+    # - Get data from request
+    # - Find/Create Conversation
+    # - Add user message to DB
+    # - Call OpenRouter (using updated APP_TITLE in headers)
+    # - Call Gemini if OpenRouter fails
+    # - Use offline_responses if both fail
+    # - Add AI reply to DB
+    # - Commit and return response
+    start_time = datetime.now(timezone.utc)
+    try:
+        data = request.json
+        if not data: return jsonify({"error": "الطلب فارغ"}), 400
+
+        messages_for_api = data.get('history', [])
+        if not messages_for_api or messages_for_api[-1].get('role') != 'user': return jsonify({"error": "سجل غير صالح"}), 400
+        user_message = messages_for_api[-1]['content'].strip()
+        if not user_message: return jsonify({"error": "رسالة فارغة"}), 400
+
+        model = data.get('model', 'mistralai/mistral-7b-instruct')
+        conversation_id_str = data.get('conversation_id')
+        temperature = float(data.get('temperature', 0.7))
+        max_tokens = int(data.get('max_tokens', 1024))
+
+        db_conversation, conversation_id = None, None
+        if conversation_id_str:
+            try: conversation_id = uuid.UUID(conversation_id_str); stmt = select(Conversation).filter_by(id=conversation_id); db_conversation = db.session.execute(stmt).scalar_one_or_none()
+            except ValueError: conversation_id = None
+            if not db_conversation: logger.warning(f"Conv ID {conversation_id_str} not found."); conversation_id = None
+
+        if not db_conversation:
+            conversation_id = uuid.uuid4(); initial_title = user_message.split('\n')[0][:80]
+            logger.info(f"Creating new conv: {conversation_id}, title: '{initial_title}'")
+            db_conversation = Conversation(id=conversation_id, title=initial_title or "محادثة جديدة"); db.session.add(db_conversation)
+
+        user_msg_db = db_conversation.add_message('user', user_message)
+
+        ai_reply, error_message, used_backup, api_source = None, None, False, "N/A"
+
+        if OPENROUTER_API_KEY:
+            api_source = "OpenRouter"
+            try:
+                 logger.debug(f"Calling OpenRouter: model={model}")
+                 headers = { "Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json", "HTTP-Referer": APP_URL, "X-Title": APP_TITLE } # Use updated APP_TITLE
+                 payload = { "model": model, "messages": messages_for_api, "temperature": temperature, "max_tokens": max_tokens }
+                 response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=45)
+                 response.raise_for_status()
+                 api_response = response.json()
+                 if api_response.get('choices') and api_response['choices'][0].get('message'):
+                     ai_reply = api_response['choices'][0]['message'].get('content', '').strip()
+                     if ai_reply: logger.info("Reply from OpenRouter.")
+                     else: logger.warning("OpenRouter empty content.")
+                 else: logger.error(f"OpenRouter invalid response: {api_response}"); error_message = "رد OpenRouter غير صالح"
+            except Exception as e: # Simplified error handling for brevity
+                 logger.error(f"OpenRouter Error: {e}"); error_message = f"خطأ OpenRouter: {e}"
+
+        if not ai_reply and GEMINI_API_KEY:
+             api_source = "Gemini (Backup)"
+             logger.info("Trying Gemini backup...")
+             ai_reply, backup_error = call_gemini_api(messages_for_api, temperature, max_tokens)
+             if ai_reply: used_backup = True; error_message = None; logger.info("Reply from Gemini backup.")
+             else: logger.error(f"Gemini backup failed: {backup_error}"); error_message = error_message or f"فشل Gemini: {backup_error}"
+
+        if not ai_reply:
+            api_source = "Offline Fallback"
+            logger.warning("Using offline fallback.")
+            ai_reply = offline_responses.get(user_message.lower(), default_offline_response)
+
+        if ai_reply:
+             assistant_msg_db = db_conversation.add_message('assistant', ai_reply)
+             try:
+                 db.session.commit(); elapsed = (datetime.now(timezone.utc) - start_time).total_seconds()
+                 logger.info(f"Chat request processed in {elapsed:.2f}s.")
+                 return jsonify({"id": str(db_conversation.id), "content": ai_reply, "used_backup": used_backup})
+             except SQLAlchemyError as e: logger.error(f"DB commit error: {e}", exc_info=True); db.session.rollback(); return jsonify({"error": f"خطأ DB: {e}"}), 500
+        else: logger.error("Failed to generate response."); db.session.rollback(); return jsonify({"error": error_message or "فشل توليد رد"}), 500
+    except Exception as e: logger.error(f"Critical /api/chat error: {e}", exc_info=True); db.session.rollback(); return jsonify({"error": f"خطأ خادم داخلي: {e}"}), 500
+
+
+# --- Conversation Management Endpoints ---
+# ... (GET /api/conversations, GET /api/conversations/<uuid>, DELETE /api/conversations/<uuid>, PUT /api/conversations/<uuid>/title, POST /api/regenerate remain the same as original, but APP_TITLE in regenerate headers will be updated) ...
+
+@app.route('/api/conversations', methods=['GET'])
+def get_conversations():
+    """API route to get a list of all conversations (simplified)."""
+    try:
+        stmt = select(Conversation.id, Conversation.title, Conversation.updated_at).order_by(desc(Conversation.updated_at))
+        results = db.session.execute(stmt).all()
+        conversations_list = [{"id": str(row.id), "title": row.title, "updated_at": row.updated_at.isoformat()} for row in results]
+        return jsonify(conversations_list)
+    except Exception as e:
+        logger.error(f"Error getting conversations list: {e}", exc_info=True)
+        return jsonify({"error": "فشل استرجاع المحادثات"}), 500
+
+@app.route('/api/conversations/<uuid:conversation_id>', methods=['GET'])
+def get_conversation(conversation_id):
+    """API route to get a specific conversation with all its messages."""
+    try:
+        stmt = select(Conversation).filter_by(id=conversation_id) # lazy='selectin' loads messages
+        conversation = db.session.execute(stmt).scalar_one_or_none()
+        if not conversation: return jsonify({"error": "المحادثة غير موجودة"}), 404
+        return jsonify(conversation.to_dict())
+    except Exception as e:
+        logger.error(f"Error getting conversation {conversation_id}: {e}", exc_info=True)
+        return jsonify({"error": "فشل استرجاع المحادثة"}), 500
+
+@app.route('/api/conversations/<uuid:conversation_id>', methods=['DELETE'])
+def delete_conversation(conversation_id):
+    """API route to delete a specific conversation."""
+    try:
+        stmt = select(Conversation).filter_by(id=conversation_id)
+        conversation = db.session.execute(stmt).scalar_one_or_none()
+        if not conversation: return jsonify({"error": "المحادثة غير موجودة"}), 404
+        db.session.delete(conversation)
+        db.session.commit()
+        return jsonify({"success": True, "message": "تم الحذف بنجاح"})
+    except Exception as e:
+        logger.error(f"Error deleting conversation {conversation_id}: {e}", exc_info=True); db.session.rollback()
+        return jsonify({"error": "فشل حذف المحادثة"}), 500
+
+@app.route('/api/conversations/<uuid:conversation_id>/title', methods=['PUT'])
+def update_conversation_title(conversation_id):
+    """API route to update the title of a specific conversation."""
+    try:
+        data = request.json; new_title = data.get('title', '').strip()
+        if not new_title or len(new_title) > 100: return jsonify({"error": "العنوان غير صالح"}), 400
+        stmt = update(Conversation).where(Conversation.id == conversation_id).values(title=new_title, updated_at=datetime.now(timezone.utc))
+        result = db.session.execute(stmt)
+        if result.rowcount == 0:
+            exists_stmt = select(Conversation.id).filter_by(id=conversation_id)
+            if not db.session.execute(exists_stmt).scalar_one_or_none(): return jsonify({"error": "المحادثة غير موجودة"}), 404
+        db.session.commit()
+        return jsonify({"success": True, "message": "تم تحديث العنوان"})
+    except Exception as e:
+        logger.error(f"Error updating title for {conversation_id}: {e}", exc_info=True); db.session.rollback()
+        return jsonify({"error": "فشل تحديث العنوان"}), 500
+
+@app.route('/api/regenerate', methods=['POST'])
+def regenerate_response():
+    """API route for regenerating the last AI response."""
+    # ... (Same logic as original, but X-Title header will use updated APP_TITLE) ...
+    start_time = datetime.now(timezone.utc)
+    try:
+        data = request.json
+        if not data: return jsonify({"error": "طلب غير صالح"}), 400
+
+        conversation_id_str = data.get('conversation_id')
+        model = data.get('model', 'mistralai/mistral-7b-instruct')
+        temperature = float(data.get('temperature', 0.7))
+        max_tokens = int(data.get('max_tokens', 1024))
+
+        if not conversation_id_str: return jsonify({"error": "معرف المحادثة مطلوب"}), 400
+        try: conversation_id = uuid.UUID(conversation_id_str)
+        except ValueError: return jsonify({"error": "تنسيق المعرف غير صالح"}), 400
+
+        logger.info(f"Regenerate request for conv: {conversation_id}")
+
+        stmt = select(Conversation).filter_by(id=conversation_id)
+        conversation = db.session.execute(stmt).scalar_one_or_none()
+        if not conversation: return jsonify({"error": "المحادثة غير موجودة"}), 404
+        messages_db = conversation.messages
+        if not messages_db: return jsonify({"error": "لا توجد رسائل"}), 400
+
+        last_ai_message_index = -1
+        for i in range(len(messages_db) - 1, -1, -1):
+            if messages_db[i].role == 'assistant': last_ai_message_index = i; break
+        if last_ai_message_index == -1: return jsonify({"error": "لا يوجد رد سابق للمساعد"}), 400
+
+        last_ai_message = messages_db[last_ai_message_index]
+        messages_for_api = [msg.to_dict() for msg in messages_db[:last_ai_message_index]]
+        if not messages_for_api or messages_for_api[-1].get('role') != 'user': return jsonify({"error": "سجل غير كافٍ لإعادة التوليد"}), 400
+
+        db.session.delete(last_ai_message) # Stage deletion
+
+        ai_reply, error_message, used_backup, api_source = None, None, False, "N/A"
+
+        if OPENROUTER_API_KEY:
+             api_source = "OpenRouter (Regen)"
+             try:
+                 headers = { "Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json", "HTTP-Referer": APP_URL, "X-Title": APP_TITLE } # Use updated APP_TITLE
+                 payload = { "model": model, "messages": messages_for_api, "temperature": temperature, "max_tokens": max_tokens }
+                 response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=45)
+                 response.raise_for_status()
+                 api_response = response.json()
+                 if api_response.get('choices') and api_response['choices'][0].get('message'): ai_reply = api_response['choices'][0]['message'].get('content', '').strip()
+                 else: error_message = "رد OpenRouter غير صالح"; logger.error(f"Regen Invalid OpenRouter Resp: {api_response}")
+             except Exception as e: logger.error(f"Regen OpenRouter Error: {e}"); error_message = f"خطأ Regen OpenRouter: {e}"
+
+        if not ai_reply and GEMINI_API_KEY:
+            api_source = "Gemini (Backup Regen)"
+            logger.info("Regen trying Gemini backup...")
+            gemini_history = [{"role": m["role"], "content": m["content"]} for m in messages_for_api]
+            ai_reply, backup_error = call_gemini_api(gemini_history, temperature, max_tokens)
+            if ai_reply: used_backup = True; error_message = None
+            else: error_message = error_message or f"فشل Regen Gemini: {backup_error}"; logger.error(f"Regen Gemini failed: {backup_error}")
+
+        if not ai_reply: # Regenerate failed
+            db.session.rollback(); # Rollback deletion
+            return jsonify({"error": error_message or "فشل إعادة التوليد"}), 500
+
+        new_assistant_msg = conversation.add_message('assistant', ai_reply)
+        try:
+            db.session.commit(); elapsed = (datetime.now(timezone.utc) - start_time).total_seconds()
+            logger.info(f"Regen processed in {elapsed:.2f}s.")
+            return jsonify({"content": ai_reply, "used_backup": used_backup})
+        except SQLAlchemyError as e: logger.error(f"Regen DB commit error: {e}", exc_info=True); db.session.rollback(); return jsonify({"error": f"خطأ DB Regen: {e}"}), 500
+
+    except Exception as e: logger.error(f"Critical /api/regenerate error: {e}", exc_info=True); db.session.rollback(); return jsonify({"error": f"خطأ خادم داخلي Regen: {e}"}), 500
+
+
+# --- معالجات الأخطاء العامة ---
+# ... (Error handlers 404, 500, Exception remain the same as original) ...
+@app.errorhandler(404)
+def not_found_error(error):
+    if request.path.startswith('/api/'): return jsonify({"error": "نقطة النهاية غير موجودة."}), 404
+    return "<h1>404 Not Found</h1><p>الصفحة المطلوبة غير موجودة.</p>", 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    original_exception = getattr(error, 'original_exception', error)
+    logger.error(f"500 Error: {request.path}: {original_exception}", exc_info=True)
+    try: db.session.rollback()
+    except Exception as e: logger.error(f"Rollback failed after 500: {e}")
+    if request.path.startswith('/api/'): return jsonify({"error": "حدث خطأ داخلي في الخادم."}), 500
+    return "<h1>500 Internal Server Error</h1><p>حدث خطأ غير متوقع.</p>", 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+     logger.error(f"Unhandled Exception: {request.path}: {e}", exc_info=True)
+     try: db.session.rollback()
+     except Exception as rb_err: logger.error(f"Rollback failed after unhandled exception: {rb_err}")
+     status_code = 500; error_message = "حدث خطأ غير متوقع."
+     if isinstance(e, requests.exceptions.HTTPError): status_code = e.response.status_code if e.response else 500; error_message = f"خطأ اتصال خارجي: {e}"
+     elif isinstance(e, SQLAlchemyError): error_message = "حدث خطأ في قاعدة البيانات."
+     if request.path.startswith('/api/'): return jsonify({"error": error_message}), status_code
+     return f"<h1>Error {status_code}</h1><p>{error_message}</p>", status_code
+
+
+# --- إنشاء جداول قاعدة البيانات عند بدء التشغيل ---
+# ... (initialize_database function remains the same as original) ...
+def initialize_database():
+    with app.app_context():
+        logger.info("Initializing database...")
+        try:
+            db.create_all()
+            logger.info("Database tables checked/created.")
+        except Exception as e:
+            db_uri_safe = str(app.config.get("SQLALCHEMY_DATABASE_URI")).split('@')[-1]
+            logger.error(f"FATAL: DB init error for '{db_uri_safe}': {e}", exc_info=False)
+            raise SystemExit(f"Database initialization failed: {e}") from e
+initialize_database()
+logger.info("DB initialization routine finished.")
+
+# --- نقطة الدخول لـ Gunicorn/WSGI Server (لا حاجة لـ app.run في الإنتاج) ---
+# ... (WSGI entry point remains the same as original) ...
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    if gunicorn_logger.handlers:
+        app.logger.handlers = gunicorn_logger.handlers
+        app.logger.setLevel(gunicorn_logger.level)
+    logger.info(f"'{APP_TITLE}' starting via WSGI server.")
+else:
+     # Run locally for testing
+     logger.info(f"Starting Flask development server for '{APP_TITLE}'...")
+     port = int(os.environ.get("PORT", 5001))
+     # Set debug=False for production simulation, or True for local dev features
+     use_debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+     app.run(host='0.0.0.0', port=port, debug=use_debug)
