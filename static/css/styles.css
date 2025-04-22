@@ -78,8 +78,8 @@ body {
     overflow: hidden;
     height: 100vh;
     width: 100vw;
-    direction: rtl;
-    text-align: right;
+    direction: rtl; /* Explicitly set RTL */
+    text-align: right; /* Default text alignment */
 }
 
 body.dark-mode {
@@ -121,11 +121,28 @@ body.dark-mode h6 {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    transition: transform var(--transition-speed) ease-in-out; /* Transform for sliding */
+    transition: transform var(--transition-speed) ease-in-out;
     z-index: 10;
     flex-shrink: 0;
     right: 0; /* Position on the right for RTL */
-    position: relative; /* Changed from fixed for desktop layout */
+    position: relative; /* Use relative for desktop layout */
+     /* Custom Scrollbar for Sidebar */
+     &::-webkit-scrollbar {
+        width: 8px;
+     }
+     &::-webkit-scrollbar-track {
+         background: transparent; /* Scrollbar track matches sidebar bg */
+     }
+     &::-webkit-scrollbar-thumb {
+         background: var(--sidebar-border-light);
+         border-radius: 10px;
+     }
+     body.dark-mode &::-webkit-scrollbar-track {
+         background: transparent;
+     }
+     body.dark-mode &::-webkit-scrollbar-thumb {
+         background: var(--sidebar-border-dark);
+     }
 }
 
 body.dark-mode #settings-sidebar {
@@ -138,16 +155,16 @@ body.dark-mode #settings-sidebar {
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-sm); /* Space before content starts */
-    border-bottom: 1px solid var(--sidebar-border-light); /* Separator */
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--sidebar-border-light);
 }
 body.dark-mode .sidebar-header {
      border-bottom-color: var(--sidebar-border-dark);
 }
 
 .sidebar-header h2 {
-     margin: 0; /* Remove default h2 margin */
-     color: var(--accent-color-light); /* Accent color for sidebar title */
+     margin: 0;
+     color: var(--accent-color-light);
 }
 body.dark-mode .sidebar-header h2 {
     color: var(--accent-color-dark);
@@ -155,11 +172,11 @@ body.dark-mode .sidebar-header h2 {
 
 /* Close button (mobile only) */
 #close-sidebar {
-    display: none; /* Hidden by default */
-    margin: 0; /* Remove default button margin */
-    padding: var(--spacing-xs); /* Ensure clickable area */
-    font-size: 1.2rem; /* Larger icon */
-    color: var(--text-color-light); /* Use text color */
+    display: none;
+    margin: 0;
+    padding: var(--spacing-xs);
+    font-size: 1.2rem;
+    color: var(--text-color-light);
 }
 body.dark-mode #close-sidebar {
     color: var(--text-color-dark);
@@ -174,11 +191,11 @@ body.dark-mode #close-sidebar:hover {
 
 #settings-sidebar h3 {
     margin-bottom: var(--spacing-sm);
-    font-size: 1rem; /* Slightly smaller heading */
+    font-size: 1rem;
     border-bottom: 1px solid var(--sidebar-border-light);
     padding-bottom: var(--spacing-xs);
     color: var(--text-color-light);
-    opacity: 0.9; /* Slightly less prominent */
+    opacity: 0.9;
 }
 
 body.dark-mode #settings-sidebar h3 {
@@ -196,27 +213,27 @@ body.dark-mode #settings-sidebar h3 {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    font-size: 0.95rem; /* Slightly smaller text */
+    font-size: 0.95rem;
 }
 
 .setting-item label {
-    font-weight: 500; /* Lighter weight */
+    font-weight: 500;
     flex-grow: 1;
-    margin-left: var(--spacing-sm); /* Space before control in RTL */
+    margin-left: var(--spacing-sm); /* Margin left for RTL */
 }
 
 .feature-item .feature-link {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-sm) var(--spacing-md); /* More padding */
+    padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--secondary-color-light);
     color: var(--text-color-light);
     border-radius: var(--border-radius);
     text-decoration: none;
     font-weight: 500;
     transition: background-color 0.15s ease, box-shadow 0.15s ease;
-    border: none; /* No border */
+    border: none;
     width: 100%;
 }
 
@@ -236,8 +253,8 @@ body.dark-mode .feature-item .feature-link:hover {
 
 .feature-item .feature-link i {
     color: var(--accent-color-light);
-    margin-left: var(--spacing-sm);
-    font-size: 1.1rem; /* Slightly larger icon */
+    margin-left: var(--spacing-sm); /* Margin left for RTL */
+    font-size: 1.1rem;
 }
 
 body.dark-mode .feature-item .feature-link i {
@@ -249,7 +266,7 @@ body.dark-mode .feature-item .feature-link i {
 .setting-item input[type="number"],
 .setting-item .slider-container {
     width: auto;
-    min-width: 120px; /* slightly wider minimum */
+    min-width: 120px;
     padding: var(--spacing-sm);
     border-radius: var(--border-radius);
     border: 1px solid var(--input-border-light);
@@ -291,12 +308,12 @@ body.dark-mode .slider-container {
     border: none;
     background-color: transparent;
     /* Custom slider thumb and track */
-    -webkit-appearance: none; /* Override default */
+    -webkit-appearance: none;
     appearance: none;
-    height: 4px; /* Track height */
-    background: var(--secondary-color-light); /* Track color */
+    height: 4px;
+    background: var(--secondary-color-light);
     border-radius: 2px;
-    outline: none; /* Remove focus outline */
+    outline: none;
 }
 body.dark-mode .slider-container input[type="range"] {
      background: var(--secondary-color-dark);
@@ -306,9 +323,9 @@ body.dark-mode .slider-container input[type="range"] {
 .slider-container input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 16px; /* Thumb width */
-    height: 16px; /* Thumb height */
-    background: var(--accent-color-light); /* Thumb color */
+    width: 16px;
+    height: 16px;
+    background: var(--accent-color-light);
     border-radius: 50%;
     cursor: pointer;
     transition: background var(--transition-speed), transform 0.1s ease;
@@ -342,7 +359,7 @@ body.dark-mode .slider-container input[type="range"]::-moz-range-thumb:hover {
 
 .slider-container span {
     min-width: 30px;
-    text-align: left; /* Align value to the left */
+    text-align: left; /* Align value to the left in RTL context */
     font-size: 0.9rem;
     color: var(--text-color-light);
 }
@@ -356,7 +373,7 @@ body.dark-mode .slider-container span {
 .switch {
     position: relative;
     display: inline-block;
-    width: 40px; /* Slightly smaller toggle */
+    width: 40px;
     height: 20px;
     flex-shrink: 0;
 }
@@ -374,7 +391,7 @@ body.dark-mode .slider-container span {
     right: 0;
     left: 0;
     bottom: 0;
-    background-color: var(--sidebar-border-light); /* Use border color for off state */
+    background-color: var(--sidebar-border-light);
     transition: var(--transition-speed);
     border-radius: 20px;
 }
@@ -388,7 +405,7 @@ body.dark-mode .slider {
     content: "";
     height: 16px;
     width: 16px;
-    right: 2px; /* Positition inside the track */
+    right: 2px; /* Position inside track in RTL */
     bottom: 2px;
     background-color: white;
     transition: var(--transition-speed);
@@ -405,33 +422,33 @@ body.dark-mode input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(-20px); /* Move to the left end */
+    transform: translateX(-20px); /* Move to the left end in RTL */
 }
 
 /* Conversations List */
 .conversations-container {
     margin-top: var(--spacing-sm);
-    max-height: 350px; /* Allow more space */
+    max-height: 350px;
     overflow-y: auto;
-    padding-left: var(--spacing-xs); /* Add padding for scrollbar clearance */
+    padding-left: var(--spacing-xs); /* Padding for scrollbar */
 
      /* Custom Scrollbar for Webkit browsers */
      &::-webkit-scrollbar {
         width: 8px;
-    }
-    &::-webkit-scrollbar-track {
-        background: transparent; /* Scrollbar track matches sidebar bg */
-    }
-    &::-webkit-scrollbar-thumb {
-        background: var(--sidebar-border-light);
-        border-radius: 10px;
-    }
-    body.dark-mode &::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    body.dark-mode &::-webkit-scrollbar-thumb {
-        background: var(--sidebar-border-dark);
-    }
+     }
+     &::-webkit-scrollbar-track {
+         background: transparent;
+     }
+     &::-webkit-scrollbar-thumb {
+         background: var(--sidebar-border-light);
+         border-radius: 10px;
+     }
+     body.dark-mode &::-webkit-scrollbar-track {
+         background: transparent;
+     }
+     body.dark-mode &::-webkit-scrollbar-thumb {
+         background: var(--sidebar-border-dark);
+     }
 
 }
 
@@ -441,17 +458,18 @@ input:checked + .slider:before {
     margin-bottom: var(--spacing-xs);
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Space out title and actions */
     align-items: center;
     transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
     border: 1px solid transparent;
-    position: relative; /* Needed for loading spinner */
-    overflow: hidden; /* Hide spinner overflow */
+    position: relative;
+    overflow: hidden;
+    flex-wrap: nowrap; /* Prevent wrapping of title and actions */
 }
 
 .conversation-item:hover {
     background-color: var(--secondary-color-light);
-    transform: translateY(-1px); /* Subtle lift effect */
+    transform: translateY(-1px);
 }
 
 body.dark-mode .conversation-item:hover {
@@ -461,7 +479,7 @@ body.dark-mode .conversation-item:hover {
 .conversation-item.active {
     background-color: var(--accent-color-light);
     color: white;
-    font-weight: 600; /* Bold active item */
+    font-weight: 600;
 }
 
 body.dark-mode .conversation-item.active {
@@ -486,12 +504,12 @@ body.dark-mode .conversation-item.active {
     width: 20px;
     height: 20px;
     animation: spin 1s linear infinite;
-    z-index: 1; /* Ensure spinner is above content */
+    z-index: 1;
 }
 
 body.dark-mode .conversation-item.loading::after {
     border-top: 3px solid var(--accent-color-dark);
-    border-color: rgba(0, 170, 255, 0.3); /* Using hardcoded RGB or variable if available */
+    border-color: rgba(0, 170, 255, 0.3);
 }
 
 @keyframes spin {
@@ -503,10 +521,12 @@ body.dark-mode .conversation-item.loading::after {
 .conversation-actions {
     display: flex;
     gap: var(--spacing-xs);
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent actions from shrinking */
     opacity: 0;
     transition: opacity 0.15s ease;
-    z-index: 1; /* Ensure actions are interactive */
+    z-index: 1;
+     /* Ensure actions are on the left in RTL */
+    margin-right: var(--spacing-sm); /* Space between text and actions */
 }
 
 .conversation-item:hover .conversation-actions,
@@ -519,9 +539,11 @@ body.dark-mode .conversation-item.loading::after {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-left: var(--spacing-sm);
+    /* margin-left: var(--spacing-sm); */ /* Removed */
     text-align: right;
-    font-weight: inherit; /* Inherit bold from active state */
+    font-weight: inherit;
+     /* Allow title to take space, but not push actions off */
+    min-width: 0; /* Allows flex item to shrink below content size */
 }
 
 
@@ -576,7 +598,7 @@ body.dark-mode .empty-state.loading-messages i {
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
     transition: background-color var(--transition-speed), opacity 0.15s ease, transform 0.1s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Add shadow */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 body.dark-mode .primary-button {
@@ -586,7 +608,7 @@ body.dark-mode .primary-button {
 
 .primary-button:hover {
     background-color: var(--accent-color-light-hover);
-    opacity: 1; /* Ensure full opacity on hover */
+    opacity: 1;
 }
 body.dark-mode .primary-button:hover {
     background-color: var(--accent-color-dark-hover);
@@ -609,7 +631,7 @@ body.dark-mode .primary-button:hover {
     align-items: center;
     justify-content: center;
     transition: background-color 0.15s ease, color 0.15s ease;
-    font-size: 1rem; /* Standard icon size */
+    font-size: 1rem;
 }
 
 body.dark-mode .icon-button {
@@ -645,10 +667,10 @@ body.dark-mode .danger-button {
 }
 
 .danger-button:hover {
-    background-color: #c82333; /* Slightly darker red */
+    background-color: #c82333;
 }
 body.dark-mode .danger-button:hover {
-    background-color: #d62c1a; /* Slightly darker red for dark mode */
+    background-color: #d62c1a;
 }
 
 
@@ -708,7 +730,7 @@ body.dark-mode .chat-header {
 }
 
 .chat-header h2 {
-    margin: 0 var(--spacing-sm) 0 0; /* Margin right in RTL */
+    margin: 0 var(--spacing-sm) 0 0;
     font-size: 1.1rem;
     color: inherit;
     display: inline-block;
@@ -722,7 +744,7 @@ body.dark-mode .chat-header {
 
 .chat-header p,
 .chat-footer p {
-    font-size: 0.8rem; /* Slightly smaller footer text */
+    font-size: 0.8rem;
     margin: 0;
     color: #888;
 }
@@ -742,14 +764,14 @@ body.dark-mode .chat-footer {
 
 /* Overlay for Mobile Sidebar */
 #sidebar-overlay {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.4);
-    z-index: 9; /* Below sidebar, above chat */
+    z-index: 9;
     transition: opacity var(--transition-speed) ease;
     opacity: 0;
 }
@@ -795,9 +817,7 @@ body.dark-mode .chat-footer {
 /* Global App Error Message */
 #app-error-message {
     position: fixed;
-    /* Calculate position dynamically based on input area height */
-    /* Adjusted using JS based on #input-area clientHeight */
-    bottom: 20px; /* Fallback/initial position */
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background-color: var(--error-color-light);
@@ -814,8 +834,8 @@ body.dark-mode .chat-footer {
     align-items: center;
     gap: var(--spacing-xs);
     pointer-events: none;
-    max-width: 90%; /* Don't span full width on large screens */
-    text-align: right; /* Ensure text is aligned right */
+    max-width: 90%;
+    text-align: right;
 }
 
 body.dark-mode #app-error-message {
@@ -825,7 +845,6 @@ body.dark-mode #app-error-message {
 #app-error-message.show {
     opacity: 1;
     visibility: visible;
-    /* JS will update the 'bottom' style directly for precision */
 }
 
 
@@ -838,14 +857,14 @@ body.dark-mode #app-error-message {
     transition: background-color var(--transition-speed);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md); /* Add gap between bubbles */
+    gap: var(--spacing-md);
 
      /* Custom Scrollbar for Webkit browsers */
      &::-webkit-scrollbar {
          width: 8px;
      }
      &::-webkit-scrollbar-track {
-         background: transparent; /* Scrollbar track matches chat area bg */
+         background: transparent;
      }
      &::-webkit-scrollbar-thumb {
          background: var(--secondary-color-light);
@@ -865,17 +884,16 @@ body.dark-mode #messages {
 
 /* Message Bubbles */
 .message-bubble {
-    max-width: 85%; /* Slightly wider bubbles */
+    max-width: 85%;
     padding: var(--spacing-md);
-    border-radius: var(--border-radius-bubble); /* Use bubble radius variable */
+    border-radius: var(--border-radius-bubble);
     position: relative;
     line-height: 1.6;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     word-wrap: break-word;
     white-space: pre-wrap;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    /* Add padding for timestamp and actions */
-    padding-bottom: calc(var(--spacing-md) + 15px); /* Space for timestamp + actions */
+    padding-bottom: calc(var(--spacing-md) + 15px);
 }
 
 /* Initial welcome message style */
@@ -889,9 +907,9 @@ body.dark-mode #messages {
     color: var(--text-color-light);
     margin-right: 0;
     margin-left: auto;
-    border-bottom-left-radius: var(--spacing-sm); /* Smaller radius at bottom corner */
+    border-bottom-left-radius: var(--spacing-sm);
     text-align: right;
-    color: #052c65; /* Darker text for readability on light bubble */
+    color: #052c65;
 }
 
 body.dark-mode .user-bubble {
@@ -904,7 +922,7 @@ body.dark-mode .user-bubble {
     color: var(--text-color-light);
     margin-left: 0;
     margin-right: auto;
-    border-bottom-right-radius: var(--spacing-sm); /* Smaller radius at bottom corner */
+    border-bottom-right-radius: var(--spacing-sm);
     text-align: right;
 }
 
@@ -917,12 +935,12 @@ body.dark-mode .ai-bubble {
 .message-timestamp {
     position: absolute;
     bottom: var(--spacing-xs);
-    right: var(--spacing-md); /* Position right for AI bubble */
+    right: var(--spacing-md);
     font-size: 0.7rem;
     color: var(--timestamp-color-light);
-    opacity: 0; /* Hidden by default */
+    opacity: 0;
     transition: opacity 0.15s ease;
-    direction: ltr; /* Display time LTR */
+    direction: ltr;
 }
 
 body.dark-mode .message-timestamp {
@@ -939,10 +957,10 @@ body.dark-mode .message-timestamp {
 .message-actions {
     position: absolute;
     bottom: var(--spacing-xs);
-    left: var(--spacing-md); /* Position left for AI bubble actions */
+    left: var(--spacing-md);
     display: flex;
     gap: var(--spacing-xs);
-    opacity: 0; /* Hidden by default */
+    opacity: 0;
     transition: opacity 0.15s ease;
     z-index: 2;
 }
@@ -965,17 +983,14 @@ body.dark-mode .message-timestamp {
      .message-timestamp {
          display: none;
      }
-     /* Adjust actions position if timestamp is hidden */
     .message-actions {
-        bottom: var(--spacing-sm); /* Adjust bottom position */
-        /* opacity: 1; */ /* Option: Always show actions on mobile */
-        /* For now, keep hover behavior */
+        bottom: var(--spacing-sm);
     }
     .user-bubble .message-actions {
          bottom: var(--spacing-sm);
     }
     .message-bubble {
-         padding-bottom: var(--spacing-md); /* Reduce bottom padding as timestamp is not visible */
+         padding-bottom: var(--spacing-md);
     }
 }
 
@@ -986,10 +1001,10 @@ body.dark-mode .message-timestamp {
     cursor: pointer;
     padding: var(--spacing-xs);
     border-radius: 50%;
-    color: inherit; /* Inherit text color from bubble */
-    opacity: 0.8; /* Slightly less prominent */
+    color: inherit;
+    opacity: 0.8;
     transition: opacity 0.15s ease, background-color 0.15s ease;
-    font-size: 0.9rem; /* Slightly smaller icons */
+    font-size: 0.9rem;
 }
 
 .message-actions button:hover {
@@ -1004,13 +1019,13 @@ body.dark-mode .message-actions button:hover {
 /* Specific styles for Vote buttons */
 .vote-buttons {
     display: flex;
-    gap: var(--spacing-xs); /* Space between like/dislike */
+    gap: var(--spacing-xs);
     align-items: center;
-    margin-left: var(--spacing-sm); /* Space from copy/speak buttons */
+    margin-left: var(--spacing-sm);
 }
 
 .vote-buttons button {
-     color: var(--timestamp-color-light); /* Default color is muted */
+     color: var(--timestamp-color-light);
      transition: color 0.15s ease, transform 0.1s ease;
 }
 body.dark-mode .vote-buttons button {
@@ -1018,7 +1033,7 @@ body.dark-mode .vote-buttons button {
 }
 
 .vote-buttons button:hover {
-    opacity: 1; /* Full opacity on hover */
+    opacity: 1;
     background-color: var(--hover-light);
 }
 body.dark-mode .vote-buttons button:hover {
@@ -1027,14 +1042,14 @@ body.dark-mode .vote-buttons button:hover {
 
 /* Active Vote States */
 .vote-buttons button.liked i {
-    color: var(--like-color-light); /* Green when liked */
+    color: var(--like-color-light);
 }
 body.dark-mode .vote-buttons button.liked i {
     color: var(--like-color-dark);
 }
 
 .vote-buttons button.disliked i {
-    color: var(--dislike-color-light); /* Red when disliked */
+    color: var(--dislike-color-light);
 }
 body.dark-mode .vote-buttons button.disliked i {
     color: var(--dislike-color-dark);
@@ -1042,9 +1057,560 @@ body.dark-mode .vote-buttons button.disliked i {
 
 /* Disable state after voting */
 .vote-buttons button:disabled {
-    opacity: 1; /* Keep opacity high so the color is visible */
-    cursor: default; /* Change cursor */
-    background: none; /* Remove hover background */
+    opacity: 1;
+    cursor: default;
+    background: none;
 }
 .vote-buttons button:disabled:hover {
-     background: none; /* Ensure no hover effect after disabled
+     background: none;
+}
+
+
+/* color for active Speak icon */
+.message-actions button i.fa-volume-high {
+    color: var(--accent-color-light);
+}
+body.dark-mode .message-actions button i.fa-volume-high {
+    color: var(--accent-color-dark);
+}
+
+
+/* Error Message Bubble */
+.message-bubble.error-bubble {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: var(--border-radius);
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 95%;
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: right;
+    padding-bottom: var(--spacing-md);
+}
+
+body.dark-mode .message-bubble.error-bubble {
+    background-color: #721c24;
+    color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.message-bubble.error-bubble i {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+
+/* Typing Indicator */
+.typing-indicator-bubble {
+    max-width: 85%;
+    margin-right: auto;
+    margin-left: 0;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-bubble);
+    border-bottom-right-radius: var(--spacing-sm);
+    background-color: var(--ai-bubble-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding-bottom: var(--spacing-md);
+}
+body.dark-mode .typing-indicator-bubble {
+     background-color: var(--ai-bubble-dark);
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    direction: ltr;
+    justify-content: flex-end;
+}
+
+.typing-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #888;
+    margin-left: 3px;
+    animation: typingAnimation 1.4s infinite;
+}
+body.dark-mode .typing-dot {
+     background-color: #bbb;
+}
+
+
+.typing-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
+    0% { opacity: 0.3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-4px); }
+    100% { opacity: 0.3; transform: translateY(0); }
+}
+
+/* Regenerate Button */
+#regenerate-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-md) auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--secondary-color-light);
+    color: var(--text-color-light);
+    border: 1px solid var(--input-border-light);
+    border-radius: var(--border-radius);
+    font-family: var(--font-family-body, var(--font-family));
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+body.dark-mode #regenerate-button {
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--input-border-dark);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#regenerate-button:hover {
+    background-color: var(--hover-light);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+body.dark-mode #regenerate-button:hover {
+    background-color: var(--hover-dark);
+}
+
+#regenerate-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+
+/* Input Area */
+#input-area {
+    padding: var(--spacing-md);
+    background-color: var(--bg-color-light);
+    border-top: 1px solid var(--secondary-color-light);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+    flex-shrink: 0;
+    height: auto;
+    min-height: calc(40px + 2 * var(--spacing-sm) + 2 * var(--spacing-xs));
+}
+
+body.dark-mode #input-area {
+    background-color: var(--bg-color-dark);
+    border-top-color: var(--secondary-color-dark);
+}
+
+#input-container {
+    display: flex;
+    align-items: flex-end;
+    background-color: var(--input-bg-light);
+    border: 1px solid var(--input-border-light);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+body.dark-mode #input-container {
+    background-color: var(--input-bg-dark);
+    border-color: var(--input-border-dark);
+}
+
+#message-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: var(--spacing-sm);
+    background-color: transparent;
+    color: var(--text-color-light);
+    font-family: var(--font-family-body, var(--font-family));
+    font-size: 1rem;
+    resize: none;
+    min-height: 40px;
+    max-height: 200px;
+    transition: color var(--transition-speed);
+    margin: 0;
+    box-sizing: border-box;
+    line-height: 1.5;
+    user-select: auto;
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+}
+
+body.dark-mode #message-input {
+    color: var(--text-color-dark);
+}
+
+#message-input::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+body.dark-mode #message-input::placeholder {
+    color: #777;
+}
+
+#send-button {
+    border: none;
+    background-color: var(--accent-color-light);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: var(--spacing-xs);
+    flex-shrink: 0;
+    transition: background-color var(--transition-speed), transform 0.15s ease;
+}
+
+body.dark-mode #send-button {
+    background-color: var(--accent-color-dark);
+}
+
+#send-button:hover {
+    background-color: var(--accent-color-light-hover);
+}
+body.dark-mode #send-button:hover {
+    background-color: var(--accent-color-dark-hover);
+}
+
+#send-button:active {
+    transform: scale(0.95);
+}
+
+#send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+body.dark-mode #send-button:disabled {
+    background-color: #555;
+}
+
+/* Input Footer */
+.input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-xs);
+    padding: 0 var(--spacing-xs);
+}
+
+.typing-hint {
+    font-size: 0.8rem;
+    color: #888;
+    text-align: right;
+}
+
+body.dark-mode .typing-hint {
+    color: #777;
+}
+
+/* Mobile Menu Button (Fixed) */
+#mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color-light);
+    color: white;
+    border-radius: 50%;
+    z-index: 25;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color var(--transition-speed), transform 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+body.dark-mode #mobile-menu {
+    background-color: var(--accent-color-dark);
+}
+#mobile-menu:active {
+    transform: scale(0.95);
+}
+
+
+/* Mobile Settings Button (in Input Footer) */
+#mobile-settings {
+    display: none;
+}
+
+/* Microphone Button Styles (in Input Container) */
+#mic-button {
+    margin-left: var(--spacing-xs);
+    transition: color 0.15s ease, background-color 0.15s ease;
+    flex-shrink: 0;
+}
+
+#mic-button.recording {
+    color: var(--mic-recording-light);
+    animation: pulse 1.5s infinite;
+}
+
+body.dark-mode #mic-button.recording {
+    color: var(--mic-recording-dark);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Confirmation Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.6);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--bg-color-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    transition: background-color var(--transition-speed);
+    text-align: right;
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--bg-color-dark);
+}
+
+.modal-content h3 {
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    color: var(--text-color-light);
+}
+body.dark-mode .modal-content h3 {
+    color: var(--text-color-dark);
+}
+
+.modal-content p {
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-color-light);
+    opacity: 0.9;
+}
+body.dark-mode .modal-content p {
+     color: var(--text-color-dark);
+}
+
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.modal-buttons button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: var(--font-family-body, var(--font-family));
+    font-size: 1rem;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.modal-buttons button:not(.danger-button) {
+    background-color: var(--secondary-color-light);
+    border: none;
+    color: var(--text-color-light);
+}
+
+body.dark-mode .modal-buttons button:not(.danger-button) {
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
+}
+.modal-buttons button:not(.danger-button):hover {
+    opacity: 0.9;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    #settings-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 85%;
+        max-width: 300px;
+        transform: translateX(100%);
+        z-index: 20;
+        box-shadow: -4px 0 10px rgba(0,0,0,0.2);
+    }
+
+    #settings-sidebar.show {
+        transform: translateX(0);
+    }
+
+    #mobile-menu {
+        display: flex;
+        right: var(--spacing-md);
+    }
+
+     #settings-sidebar.show + #sidebar-overlay + #chat-container #mobile-menu {
+         right: calc(var(--sidebar-width) + var(--spacing-md));
+         transition: right var(--transition-speed) ease-in-out;
+     }
+
+    #mobile-settings {
+        display: block;
+    }
+
+    .sidebar-footer #toggle-sidebar {
+        display: none;
+    }
+
+     #settings-sidebar .sidebar-header #close-sidebar {
+         display: flex;
+     }
+
+    .message-bubble {
+        max-width: 95%;
+    }
+     .message-bubble .message-actions {
+         left: var(--spacing-sm);
+         right: auto;
+     }
+    .user-bubble .message-actions {
+         right: var(--spacing-sm);
+         left: auto;
+     }
+
+     .message-bubble .message-timestamp {
+         right: var(--spacing-sm);
+         left: auto;
+     }
+     .user-bubble .message-timestamp {
+         left: var(--spacing-sm);
+         right: auto;
+     }
+
+
+    #input-area {
+        padding: var(--spacing-sm);
+    }
+    #input-container {
+         padding: var(--spacing-xs);
+    }
+    #message-input {
+         padding: var(--spacing-sm);
+    }
+     #mic-button, #send-button {
+         margin-left: var(--spacing-xs);
+     }
+
+    .input-footer {
+        padding: 0 var(--spacing-xs);
+    }
+
+    .chat-header, .chat-footer {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Code Block Copy Button (if you add code blocks directly in HTML/JS) */
+button.copy-code-button {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    float: left;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+button.copy-code-button:hover {
+    background-color: #e2e2e2;
+}
+button.copy-code-button i {
+    color: #333;
+}
+button.copy-code-button.copied {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+button.copy-code-button.copied i {
+     color: white;
+}
+button.copy-code-button.error {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+button.copy-code-button.error i {
+     color: white;
+}
+
+pre {
+    position: relative;
+    padding-top: 10px;
+    clear: both;
+}
