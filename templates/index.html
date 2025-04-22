@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Changed Title -->
-    <title>dzteck Chat</title>
+    <title>{{ app_title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Updated Font Awesome for potentially newer icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-     <!-- Include Font Awesome Brands for social icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/brands.min.css" integrity="sha512-KQE/DtDPNGu7hV9/LzMxU2g7QO0AmQk8JdGvLpS4f/4h0Tq5KkHhF+A/Rsm0h9+gXvHGU+G4M4hQ0w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Fonts for better Arabic support -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
@@ -20,8 +17,7 @@
         <!-- Sidebar for settings and conversations -->
         <div id="settings-sidebar">
              <div class="sidebar-header">
-                 <!-- Changed Heading -->
-                 <h2>dzteck</h2>
+                 <h2>ياسمين GPT</h2>
                  <!-- Close button for mobile, hidden on desktop -->
                  <button id="close-sidebar" class="icon-button close-button" title="إغلاق الشريط الجانبي">
                      <i class="fas fa-times"></i>
@@ -49,33 +45,13 @@
 
                 <!-- Translation Feature Example -->
                 <div class="feature-item">
-                     <!-- Assuming /translation exists or will be added -->
                     <a href="/translation" class="feature-link">
-                        <i class="fas fa-language"></i> <span>خدمة الترجمة</span>
+                        <i class="fas fa-language"></i> خدمة الترجمة
                     </a>
                 </div>
                  <!-- Add other feature items here as needed -->
+                 <!-- Example: <div class="feature-item"><a href="/speech" class="feature-link"><i class="fas fa-microphone"></i> خدمة الصوت</a></div> -->
             </div>
-
-            <!-- START: New Social Media Section -->
-            <div class="sidebar-section">
-                <h3>تابعنا</h3>
-                <div class="social-links">
-                     <!-- Remember to replace # with your actual profile links -->
-                    <a href="#" target="_blank" class="social-link" title="تابعنا على تليجرام">
-                        <i class="fab fa-telegram fa-lg"></i> <span>تليجرام</span>
-                    </a>
-                    <a href="#" target="_blank" class="social-link" title="تابعنا على فيسبوك">
-                        <i class="fab fa-facebook fa-lg"></i> <span>فيسبوك</span>
-                    </a>
-                    <a href="#" target="_blank" class="social-link" title="تابعنا على تيك توك">
-                        <i class="fab fa-tiktok fa-lg"></i> <span>تيك توك</span>
-                    </a>
-                    <!-- Add more social links here if needed -->
-                </div>
-            </div>
-            <!-- END: New Social Media Section -->
-
 
             <!-- Settings Section -->
             <div class="sidebar-section settings-section">
@@ -126,8 +102,7 @@
 
             <!-- Sidebar Footer -->
             <div class="sidebar-footer">
-                <!-- Changed Footer Text -->
-                <span>تم التطوير بواسطة dzteck</span>
+                <span>تم التطوير بواسطة ياسمين</span>
                 <!-- Toggle sidebar button (Desktop Only), hidden on mobile -->
                 <button id="toggle-sidebar" class="icon-button" title="إغلاق الشريط الجانبي">
                     <i class="fas fa-chevron-right"></i>
@@ -142,9 +117,8 @@
         <div id="chat-container">
             <!-- App Header -->
             <div class="chat-header">
-                 <!-- Changed Header Title using app_title from Flask, updated version -->
-                <h2>{{ app_title }} <span class="version">v2.1</span></h2>
-                <p>شركة dzteck | بواسطة rahmani</p> <!-- Already has dzteck -->
+                <h2>{{ app_title }} <span class="version">v2.0</span></h2>
+                <p>شركة dzteck | بواسطة rahmani</p>
             </div> <!-- End .chat-header -->
 
             <!-- Offline Indicator -->
@@ -156,13 +130,30 @@
             <!-- Messages Container -->
             <div id="messages">
                 <!-- Initial Welcome Message (added by app.js on load if no conversation) -->
-                <!-- Example structure (JS will create this): -->
+                <!-- Example structure of a message bubble: -->
                 <!--
-                <div class="message-bubble ai-bubble initial-welcome">
-                    <p>السلام عليكم! أنا مساعد dzteck الرقمي. كيف يمكنني مساعدتك اليوم؟</p>
-                    ... actions ...
+                <div class="message-bubble ai-bubble initial-welcome" data-message-id="[optional-db-id]">
+                    <p>السلام عليكم! أنا ياسمين، مساعدتك الرقمية بالعربية. كيف يمكنني مساعدتك اليوم؟</p>
+                    <div class="message-timestamp">10:30 ص</div>
+                    <div class="message-actions">
+                        <button class="copy-btn" title="نسخ الرد"><i class="fas fa-copy"></i></button>
+                         <button class="speak-btn" title="استماع إلى الرد"><i class="fas fa-volume-up"></i></button>
+                        <div class="vote-buttons">
+                            <button class="like-btn" title="أعجبني" data-vote-type="like"><i class="fas fa-thumbs-up"></i></button>
+                            <button class="dislike-btn" title="لم يعجبني" data-vote-type="dislike"><i class="fas fa-thumbs-down"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-bubble user-bubble" data-message-id="[optional-db-id]">
+                    <p>مرحبا ياسمين، كيف حالك؟</p>
+                    <div class="message-timestamp">10:31 ص</div>
+                     <div class="message-actions">
+                         <button class="copy-btn" title="نسخ الرسالة"><i class="fas fa-copy"></i></button>
+                          // Vote buttons typically only for AI messages
+                    </div>
                 </div>
                 -->
+
             </div> <!-- End #messages -->
 
             <!-- Regenerate Button (Positioned by app.js) -->
@@ -196,8 +187,7 @@
 
             <!-- App Footer -->
             <div class="chat-footer">
-                 <!-- Footer already mentions dzteck, updated version -->
-                <p>التطوير بواسطة شركة dzteck للبرمجيات | الإصدار v2.1</p>
+                <p>التطوير بواسطة شركة dzteck للبرمجيات | الإصدار v2.0</p>
             </div> <!-- End .chat-footer -->
 
         </div> <!-- End #chat-container -->
